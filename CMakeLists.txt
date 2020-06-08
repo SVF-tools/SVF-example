@@ -29,9 +29,9 @@ Please set this to environment variable to point to the LLVM build directory\
 (e.g. on linux: export LLVM_DIR=/path/to/llvm/build/dir)")
 endif()
 
-set(SVF_HEADER "${SVFLib}/include")
-set(SVF_LIB "${SVFLib}/libsvf_static_lib.a")
-set(LLVMCudd "${SVFLib}/libCudd.a")
+set(SVF_HEADER "${SVF_DIR}/include")
+set(SVF_LIB "${SVF_DIR}/libsvf_static_lib.a")
+set(LLVMCudd "${SVF_DIR}/libCudd.a")
 if (EXISTS "${SVF_HEADER}" AND EXISTS "${SVF_LIB}")
     message(STATUS "SVF_HEADER: ${SVF_HEADER}")
     message(STATUS "SVF_LIB: ${SVF_LIB}")
