@@ -1,7 +1,6 @@
 llvm_map_components_to_libnames(llvm_libs bitwriter core ipo irreader instcombine instrumentation target linker analysis scalaropts support )
 add_executable(svf-ex svf-ex.cpp)
 
-set(LLVMCudd "$ENV{LLVM_CUDD}")
 target_link_libraries(svf-ex ${SVF_LIB} ${LLVMCudd} ${llvm_libs})
 
 set_target_properties( svf-ex PROPERTIES
