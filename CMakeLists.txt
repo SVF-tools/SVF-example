@@ -39,7 +39,6 @@ else()
     message(FATAL_ERROR "${SVF_LIB} or ${SVF_HEADER} not exists")
     endif()
     include_directories(${SVF_HEADER})
-    link_directories(${SVF_LIB} ${SVF_LIB}/CUDD)
 
 
 
