@@ -29,7 +29,7 @@ Please set this to environment variable to point to the LLVM build directory\
 (e.g. on linux: export LLVM_DIR=/path/to/llvm/build/dir)")
 endif()
 if (UNIX AND NOT APPLE)
-    MESSAGE (STATUS "building SVF on Unbuntu")
+    MESSAGE (STATUS "building SVF on Ubuntu")
     set(SVF_LIB "${SVF_DIR}/libsvf_ubuntu.a")
     set(LLVMCudd "${SVF_DIR}/libCudd_ubuntu.a")
 elseif (APPLE)
