@@ -28,10 +28,17 @@ WARNING: The LLVM_DIR var was not set (required for an out-of-source build)!\n\
 Please set this to environment variable to point to the LLVM build directory\
 (e.g. on linux: export LLVM_DIR=/path/to/llvm/build/dir)")
 endif()
-
+if (UNIX AND NOT APPLE)
+    MESSAGE (STATUS "building SVF on Ubuntu")
+    set(SVF_LIB "${SVF_DIR}/libsvf_ubuntu.a")
+    set(LLVMCudd "${SVF_DIR}/libCudd_ubuntu.a")
+elseif (APPLE)
+    MESSAGE (STATUS "building SVF on Mac")
+    set(SVF_LIB "${SVF_DIR}/libsvf_mac.a")
+    set(LLVMCudd "${SVF_DIR}/libCudd_mac.a")
+endif()
 set(SVF_HEADER "${SVF_DIR}/include")
-set(SVF_LIB "${SVF_DIR}/libsvf_static_lib.a")
-set(LLVMCudd "${SVF_DIR}/libCudd.a")
+
 if (EXISTS "${SVF_HEADER}" AND EXISTS "${SVF_LIB}")
     message(STATUS "SVF_HEADER: ${SVF_HEADER}")
     message(STATUS "SVF_LIB: ${SVF_LIB}")

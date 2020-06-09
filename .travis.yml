@@ -1,0 +1,32 @@
+language: generic
+
+matrix:
+  include:
+    - os: linux
+
+      dist: bionic
+      sudo: required
+      install:
+        - wget https://github.com/charles32110/SVF-Static-Lib/releases/download/V1.0.1/V1.0.1.tar.gz
+        - tar -xvf V1.0.1.tar.gz
+        - export SVF_DIR=$PWD/SVF-Static-Lib
+        - wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
+        - tar -xvf clang*.tar.xz
+        - export LLVM_DIR=$PWD/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04
+    - os: osx
+      osx_image: xcode11.5
+      install:
+        - wget https://github.com/charles32110/SVF-Static-Lib/releases/download/V1.0.1/V1.0.1.tar.gz
+        - tar -xzvf V1.0.1.tar.gz
+        - export SVF_DIR=$PWD/SVF-Static-Lib
+        - wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
+        - tar -xzvf clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
+        - export LLVM_DIR=$PWD/clang+llvm-10.0.0-x86_64-apple-darwin
+
+before_script:
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update       ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install cmake gcc g++; fi
+
+script:
+  - cmake -DSVF_DIR=$SVF_DIR
+  - make
