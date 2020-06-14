@@ -8,12 +8,12 @@ matrix:
       sudo: required
       install:
         - npm install svflib
-        - export SVF_DIR=$PWD/SVF
+        - export SVF_DIR=$PWD/node_modules/SVF
     - os: osx
       osx_image: xcode11.5
       install:
        - npm install svflib
-        - export SVF_DIR=$PWD/SVF
+        - export SVF_DIR=$PWD/node_modules/SVF
 
 before_script:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update       ; fi
