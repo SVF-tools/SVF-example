@@ -14,7 +14,7 @@ $ npm list
 /home/samsung
 └── svflib@1.0.0
 ```
-Normally your_path_to_SVF is `/home/samsung/node_modules/SVF`.
+Then your_path_to_SVF is `/home/samsung/node_modules/SVF`.
 
 ## 3. cmake your project by pointing to SVF_DIR and LLVM_DIR
 ```
