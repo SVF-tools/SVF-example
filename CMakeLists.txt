@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.4.3)
-
+set(LLVM_DIR "${SVF_DIR}/llvm-10.0.0.obj")
 if (DEFINED LLVM_DIR)
         set(ENV{LLVM_DIR} "${LLVM_DIR}")
     endif()
@@ -30,12 +30,12 @@ Please set this to environment variable to point to the LLVM build directory\
 endif()
 if (UNIX AND NOT APPLE)
     MESSAGE (STATUS "building SVF on Ubuntu")
-    set(SVF_LIB "${SVF_DIR}/libsvf_ubuntu.a")
-    set(LLVMCudd "${SVF_DIR}/libCudd_ubuntu.a")
+    set(SVF_LIB "${SVF_DIR}/Release-build/libsvf_ubuntu.a")
+    set(LLVMCudd "${SVF_DIR}/Release-build/libCudd_ubuntu.a")
 elseif (APPLE)
     MESSAGE (STATUS "building SVF on Mac")
-    set(SVF_LIB "${SVF_DIR}/libsvf_mac.a")
-    set(LLVMCudd "${SVF_DIR}/libCudd_mac.a")
+    set(SVF_LIB "${SVF_DIR}/Release-build/libsvf_mac.a")
+    set(LLVMCudd "${SVF_DIR}/Release-build/libCudd_mac.a")
 endif()
 set(SVF_HEADER "${SVF_DIR}/include")
 
