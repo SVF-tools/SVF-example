@@ -13,7 +13,7 @@ matrix:
       osx_image: xcode11.5
       install:
        - npm install svflib
-        - export SVF_DIR=$PWD/node_modules/SVF
+       - export SVF_DIR=$PWD/node_modules/svflib
 
 before_script:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update       ; fi
