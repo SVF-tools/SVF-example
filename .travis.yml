@@ -7,21 +7,13 @@ matrix:
       dist: bionic
       sudo: required
       install:
-        - wget https://github.com/charles32110/SVF_Lib/archive/V1.0.0.tar.gz
-        - tar -xvf V1.0.0.tar.gz
-        - export SVF_DIR=$PWD/SVF_Lib-1.0.0
-        - wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
-        - tar -xvf clang*.tar.xz
-        - export LLVM_DIR=$PWD/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04
+        - npm install svflib
+        - export SVF_DIR=$PWD/SVF
     - os: osx
       osx_image: xcode11.5
       install:
-        - wget https://github.com/charles32110/SVF_Lib/archive/V1.0.0.tar.gz
-        - tar -xzvf V1.0.0.tar.gz
-        - export SVF_DIR=$PWD/SVF_Lib-1.0.0
-        - wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
-        - tar -xzvf clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
-        - export LLVM_DIR=$PWD/clang+llvm-10.0.0-x86_64-apple-darwin
+       - npm install svflib
+        - export SVF_DIR=$PWD/SVF
 
 before_script:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update       ; fi
