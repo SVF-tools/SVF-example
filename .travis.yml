@@ -7,12 +7,12 @@ matrix:
       dist: bionic
       sudo: required
       install:
-        - npm install svflib
+        - npm install svf-lib
         - export SVF_DIR=$PWD/node_modules/SVF
     - os: osx
       osx_image: xcode11.5
       install:
-       - npm install svflib
+       - npm install svf-lib
        - export SVF_DIR=$PWD/node_modules/SVF
 
 before_script:
