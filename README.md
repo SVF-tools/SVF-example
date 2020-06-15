@@ -5,7 +5,7 @@ git clone https://github.com/SVF-tools/SVF-example.git
 
 ## 2. Install SVF via npm
 ```
-npm install svflib
+npm install svf-lib
 ```
 
 You are able to check your installed npm package and its path via command `npm list`
