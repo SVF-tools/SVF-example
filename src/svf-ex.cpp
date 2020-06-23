@@ -29,6 +29,8 @@
 #include "SVF-FE/LLVMUtil.h"
 #include "Graphs/SVFG.h"
 #include "WPA/Andersen.h"
+#include "SABER/LeakChecker.h"
+
 
 using namespace llvm;
 using namespace std;
@@ -147,19 +149,24 @@ int main(int argc, char ** argv) {
 
     /// Program Assignment Graph (PAG)
     PAG* pag = ander->getPAG();
+    pag->dump("pag");
 
     /// Call Graph
     PTACallGraph* callgraph = ander->getPTACallGraph();
+    callgraph->dump("callgraph");
 
     /// ICFG
     ICFG* icfg = pag->getICFG();
+    icfg->dump("icfg");
 
     /// Value-Flow Graph (VFG)
     VFG* vfg = new VFG(callgraph);
+    icfg->dump("vfg");
 
     /// Sparse value-flow graph (SVFG)
     SVFGBuilder svfBuilder;
     SVFG* svfg = svfBuilder.buildFullSVFGWithoutOPT(ander);
+    svfg->dump("svfg");
 
     /// Collect uses of an LLVM Value
     /// traverseOnVFG(svfg, value);
@@ -167,6 +174,9 @@ int main(int argc, char ** argv) {
     /// Collect all successor nodes on ICFG
     /// traverseOnICFG(icfg, value);
 
+    /// Perform memory leak detection
+    LeakChecker* saber = new LeakChecker();  // if no checker is specified, we use leak checker as the default one.
+    saber->runOnModule(svfModule);
     return 0;
 }
 
