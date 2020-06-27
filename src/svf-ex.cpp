@@ -161,7 +161,7 @@ int main(int argc, char ** argv) {
 
     /// Value-Flow Graph (VFG)
     VFG* vfg = new VFG(callgraph);
-    icfg->dump("vfg");
+    vfg->dump("vfg");
 
     /// Sparse value-flow graph (SVFG)
     SVFGBuilder svfBuilder;
