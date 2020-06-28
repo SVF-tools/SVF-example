@@ -30,10 +30,14 @@ endif()
 
 if (EXISTS "${SVF_DIR}")
 else()
+    set(SVF_DIR $ENV{SVF_DIR})
+    if(EXISTS "${SVF_DIR}")
+    else()
     message(FATAL_ERROR "\
 WARNING: The SVF_DIR var was not set (required for an out-of-source build)!\n\
 Please set this to environment variable to point to the SVF_DIR directory or set this variable to cmake configuration\n
 (e.g. on linux: export SVF_DIR=/path/to/SVF/dir) \n or \n \n(make the project via: cmake -DSVF_DIR=your_path_to_SVF) ")
+    endif()
 endif()
 
 if (UNIX AND NOT APPLE)
