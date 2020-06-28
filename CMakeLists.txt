@@ -30,7 +30,7 @@ endif()
 
 if (EXISTS "${SVF_DIR}")
 else()
-    set(SVF_DIR ENV{SVF_DIR})
+    set(SVF_DIR $ENV{SVF_DIR})
     if(EXISTS "${SVF_DIR}")
     else()
     message(FATAL_ERROR "\
