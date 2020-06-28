@@ -19,6 +19,6 @@ before_script:
 
 script:
   - export SVF_DIR=$PWD/node_modules/SVF/SVF-$TRAVIS_OS_NAME
-  - export LLVM_DIR=$PWD/node_modules/SVF/llvm-10.0.0.obj
-  - cmake 
+  - export LLVM_DIR=$PWD/node_modules/llvm-10.0.0.obj
+  - cmake .
   - make
