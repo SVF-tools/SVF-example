@@ -14,13 +14,19 @@ $ npm list
 /home/samsung
 └── svflib@1.0.0
 ```
-Then your_path_to_SVF is `/home/samsung/node_modules/SVF/SVF-linux` or `/home/samsung/node_modules/SVF/SVF-osx`.
+Then your_path_to_SVF is `/home/samsung/node_modules/SVF/`.
 
 your_path_to_LLVM is `/home/samsung/node_modules/llvm-10.0.0.obj`.
+your_path_to_SVF_env `/home/samsung/node_modules/svf-lib/env.sh`.
 
-
-## 3. cmake your project by pointing to SVF_DIR and LLVM_DIR
+## 3. Setup SVF environment
+You are able to source SVF environment script to configure SVF environment. 
 ```
-cmake -DSVF_DIR=your_path_to_SVF -DLLVM_DIR=your_path_to_LLVM
+source /path/to/your/installed/npm/package/env.sh
+```
+
+## 4. cmake your project 
+```
+cmake .
 make
 ```
