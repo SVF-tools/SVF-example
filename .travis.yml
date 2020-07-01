@@ -18,7 +18,7 @@ before_script:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install cmake gcc g++; fi
 
 script:
-  - export SVF_DIR=$PWD/node_modules/SVF/SVF-$TRAVIS_OS_NAME
-  - export LLVM_DIR=$PWD/node_modules/llvm-10.0.0.obj
+  - source $TRAVIS_BUILD_DIR/node_modules/SVF/env.sh
+  - cd $TRAVIS_BUILD_DIR
   - cmake .
   - make
