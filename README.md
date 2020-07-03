@@ -16,5 +16,11 @@ source ./env.sh
 ## 4. cmake your project 
 ```
 cmake .
+```
+```
 make
+```
+## 5. Analyze a bc file using svf-ex executable
+```
+./bin/svf-ex example.bc
 ```
