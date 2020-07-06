@@ -1,7 +1,6 @@
 ## 1. Install SVF via npm
 ```
-cd ~
-npm install svf-lib
+npm i svf-lib --prefix ${HOME}
 ```
 
 ## 2. Clone repository
