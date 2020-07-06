@@ -1,11 +1,12 @@
-## 1. Clone repository
+## 1. Install SVF via npm
 ```
-git clone https://github.com/SVF-tools/SVF-example.git
+cd ~
+npm install svf-lib
 ```
 
-## 2. Install SVF via npm
+## 2. Clone repository
 ```
-npm install svf-lib
+git clone https://github.com/SVF-tools/SVF-example.git
 ```
 
 ## 3. Setup SVF environment and build your project 
