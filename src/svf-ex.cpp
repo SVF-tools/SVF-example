@@ -30,6 +30,7 @@
 #include "Graphs/SVFG.h"
 #include "WPA/Andersen.h"
 #include "SABER/LeakChecker.h"
+#include "SVF-FE/PAGBuilder.h"
 
 
 using namespace llvm;
@@ -139,17 +140,19 @@ int main(int argc, char ** argv) {
 
     SVFModule* svfModule = LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
 
-    Andersen* ander = AndersenWaveDiff::createAndersenWaveDiff(svfModule);
+    /// Build Program Assignment Graph (PAG)
+    PAGBuilder builder;
+    PAG* pag = builder.build(svfModule);
+    pag->dump("pag");
+
+    /// Create Andersen's pointer analysis
+    Andersen* ander = AndersenWaveDiff::createAndersenWaveDiff(pag);
 
     /// Query aliases
     /// aliasQuery(ander,value1,value2);
 
     /// Print points-to information
     /// printPts(ander, value1);
-
-    /// Program Assignment Graph (PAG)
-    PAG* pag = ander->getPAG();
-    pag->dump("pag");
 
     /// Call Graph
     PTACallGraph* callgraph = ander->getPTACallGraph();
@@ -161,7 +164,7 @@ int main(int argc, char ** argv) {
 
     /// Value-Flow Graph (VFG)
     VFG* vfg = new VFG(callgraph);
-    icfg->dump("vfg");
+    vfg->dump("vfg");
 
     /// Sparse value-flow graph (SVFG)
     SVFGBuilder svfBuilder;

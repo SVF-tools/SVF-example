@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.4.3)
-set(LLVM_DIR "${SVF_DIR}/llvm-10.0.0.obj")
 if (DEFINED LLVM_DIR)
         set(ENV{LLVM_DIR} "${LLVM_DIR}")
     endif()
@@ -28,24 +27,30 @@ WARNING: The LLVM_DIR var was not set (required for an out-of-source build)!\n\
 Please set this to environment variable to point to the LLVM build directory\
 (e.g. on linux: export LLVM_DIR=/path/to/llvm/build/dir)")
 endif()
-if (UNIX AND NOT APPLE)
-    MESSAGE (STATUS "building SVF on Ubuntu")
-    set(SVF_LIB "${SVF_DIR}/Release-build/lib/libsvf_ubuntu.a")
-    set(LLVMCudd "${SVF_DIR}/Release-build/lib/libCudd_ubuntu.a")
-elseif (APPLE)
-    MESSAGE (STATUS "building SVF on Mac")
-    set(SVF_LIB "${SVF_DIR}/Release-build/lib/libsvf_mac.a")
-    set(LLVMCudd "${SVF_DIR}/Release-build/lib/libCudd_mac.a")
+
+if (EXISTS "${SVF_DIR}")
+else()
+    set(SVF_DIR $ENV{SVF_DIR})
+    if(EXISTS "${SVF_DIR}")
+    else()
+    message(FATAL_ERROR "\
+WARNING: The SVF_DIR var was not set (required for an out-of-source build)!\n\
+Please set this to environment variable to point to the SVF_DIR directory or set this variable to cmake configuration\n
+(e.g. on linux: export SVF_DIR=/path/to/SVF/dir) \n or \n \n(make the project via: cmake -DSVF_DIR=your_path_to_SVF) ")
+    endif()
+endif()
+
+if(CMAKE_BUILD_TYPE MATCHES "Debug")
+    MESSAGE (STATUS "building SVF in debug mode")
+    set(SVF_LIB "${SVF_DIR}/Debug-build/lib/libSvf.a")
+    set(LLVMCudd "${SVF_DIR}/Debug-build/lib/CUDD/libCudd.a")
+else()
+    MESSAGE (STATUS "building SVF in release mode")
+    set(SVF_LIB "${SVF_DIR}/Release-build/lib/libSvf.a")
+    set(LLVMCudd "${SVF_DIR}/Release-build/lib/CUDD/libCudd.a")
 endif()
 set(SVF_HEADER "${SVF_DIR}/include")
-
-if (EXISTS "${SVF_HEADER}" AND EXISTS "${SVF_LIB}")
-    message(STATUS "SVF_HEADER: ${SVF_HEADER}")
-    message(STATUS "SVF_LIB: ${SVF_LIB}")
-else()
-    message(FATAL_ERROR "${SVF_LIB} or ${SVF_HEADER} not exists")
-    endif()
-    include_directories(${SVF_HEADER})
+include_directories(${SVF_HEADER})
 
 
 

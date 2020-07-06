@@ -1,23 +1,23 @@
-## 1. clone repository
+## 1. Install SVF via npm
+```
+npm i svf-lib --prefix ${HOME}
+```
+
+## 2. Clone repository
 ```
 git clone https://github.com/SVF-tools/SVF-example.git
 ```
 
-## 2. Install SVF via npm
+## 3. Setup SVF environment and build your project 
 ```
-npm install svf-lib
+source ./env.sh
 ```
-
-You are able to check your installed npm package and its path via command `npm list`
+cmake the project
 ```
-$ npm list
-/home/samsung
-└── svflib@1.0.0
-```
-Then your_path_to_SVF is `/home/samsung/node_modules/SVF`.
-
-## 3. cmake your project by pointing to SVF_DIR and LLVM_DIR
-```
-cmake -DSVF_DIR=your_path_to_SVF
+cmake .
 make
+```
+## 4. Analyze a bc file using svf-ex executable
+```
+./bin/svf-ex example.bc
 ```
