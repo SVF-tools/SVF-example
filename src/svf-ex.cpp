@@ -140,9 +140,10 @@ int main(int argc, char ** argv) {
 
     SVFModule* svfModule = LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
 
-	/// Build Program Assignment Graph (PAG)
-	PAGBuilder builder;
-	PAG* pag = builder.build(svfModule);
+    /// Build Program Assignment Graph (PAG)
+    PAGBuilder builder;
+    PAG* pag = builder.build(svfModule);
+    pag->dump("pag");
 
     /// Create Andersen's pointer analysis
     Andersen* ander = AndersenWaveDiff::createAndersenWaveDiff(pag);
@@ -152,10 +153,6 @@ int main(int argc, char ** argv) {
 
     /// Print points-to information
     /// printPts(ander, value1);
-
-    /// Program Assignment Graph (PAG)
-    PAG* pag = ander->getPAG();
-    pag->dump("pag");
 
     /// Call Graph
     PTACallGraph* callgraph = ander->getPTACallGraph();
