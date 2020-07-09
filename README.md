@@ -12,7 +12,7 @@ git clone https://github.com/SVF-tools/SVF-example.git
 ```
 source ./env.sh
 ```
-cmake the project
+cmake the project (`cmake -DCMAKE_BUILD_TYPE=Debug .` for debug build)
 ```
 cmake .
 make
