@@ -33,6 +33,7 @@
 #include "SVF-FE/PAGBuilder.h"
 
 
+using namespace SVF;
 using namespace llvm;
 using namespace std;
 
