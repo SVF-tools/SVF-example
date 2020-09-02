@@ -1,4 +1,4 @@
-## 1. Install SVF via npm
+## 1. Install SVF and its dependence (LLVM pre-built binary) via npm
 ```
 npm i svf-lib --prefix ${HOME}
 ```
