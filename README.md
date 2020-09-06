@@ -1,6 +1,6 @@
 ## 1. Install SVF and its dependence (LLVM pre-built binary) via npm
 ```
-npm i svf-lib --prefix ${HOME}
+npm i --silent svf-lib --prefix ${HOME}
 ```
 
 ## 2. Clone repository
