@@ -144,12 +144,7 @@ int main(int argc, char ** argv) {
 
     SVFModule* svfModule = LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
 
-	if (LEAKCHECKER) {
-		/// Perform memory leak detection
-		LeakChecker *saber = new LeakChecker(); // if no checker is specified, we use leak checker as the default one.
-		saber->runOnModule(svfModule);
-	} else {
-		/// Build Program Assignment Graph (PAG)
+    /// Build Program Assignment Graph (PAG)
 		PAGBuilder builder;
 		PAG *pag = builder.build(svfModule);
 		pag->dump("pag");
@@ -185,7 +180,10 @@ int main(int argc, char ** argv) {
 
 		/// Collect all successor nodes on ICFG
 		/// traverseOnICFG(icfg, value);
-	}
+		
+		LeakChecker *saber = new LeakChecker(); // if no checker is specified, we use leak checker as the default one.
+		saber->runOnModule(svfModule);
+	
 
     return 0;
 }
