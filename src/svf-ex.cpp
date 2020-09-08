@@ -132,6 +132,35 @@ void traverseOnVFG(const SVFG* vfg, Value* val){
     	/// Value* val = pNode->getValue();
     }
 }
+//traverse from src node to sink node give the all paths
+void dfs_on_icfg(ICFGNode* src, ICFGNode* sink,set<const ICFGNode*> visited, FIFOWorkList<const ICFGNode*> nStack)
+{
+    if (src->getId()==sink->getId())
+    {
+
+        while ( !nStack.empty() )
+        {
+            const ICFGNode* cur = nStack.pop();
+            //may fix here to generate the ICFGNode instruction sequences
+            cout << cur->getId() << "-->" ;
+        }
+        cout << src->getId() << '\n';
+        return;
+    }
+    // recursion exit : end node or back to the circle start node
+    else if ( !src->hasOutgoingEdge() or visited.find(src) != visited.end())
+    {
+        return;
+    }
+    visited.insert(src);
+    nStack.push(src);
+    //dfs
+    for ( ICFGNode::iterator it = src->OutEdgeBegin(); it != src->OutEdgeEnd(); it ++)
+    {
+        ICFGNode* cur = (*it)->getDstNode();
+        dfs_on_icfg(cur,sink,visited,nStack);
+    }
+}
 
 int main(int argc, char ** argv) {
 
@@ -164,6 +193,12 @@ int main(int argc, char ** argv) {
 
 		/// ICFG
 		ICFG *icfg = pag->getICFG();
+		//give a src and a sink NodeID to the generate all following paths
+        ICFGNode * srcNode = icfg->getICFGNode(16);
+        ICFGNode * sinkNode = icfg->getICFGNode(18);
+        //store for node sequence
+        FIFOWorkList<const ICFGNode*> nStack;
+        dfs_on_icfg(srcNode,sinkNode,{},nStack);
 		icfg->dump("icfg");
 
 		/// Value-Flow Graph (VFG)
