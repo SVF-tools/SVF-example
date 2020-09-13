@@ -43,6 +43,9 @@ static llvm::cl::opt<std::string> InputFilename(cl::Positional,
 static llvm::cl::opt<bool> LEAKCHECKER("leak", llvm::cl::init(false),
                                        llvm::cl::desc("Memory Leak Detection"));
 
+ICFGNode *srcNode = NULL;
+ICFGNode *sinkNode = NULL;
+
 /*!
  * An example to query alias results of two LLVM values
  */
@@ -162,6 +165,23 @@ void dfs_on_icfg(ICFGNode* src, ICFGNode* sink, set<const ICFGNode*>& visited, v
     seq.pop_back();
 }
 
+//analyze and init the src and sink node from the icfg 
+void initSrc_and_Sink(ICFG *icfg){
+	for(ICFG::iterator it = icfg->begin(), eit = icfg->end(); it!=eit; ++it)
+    {
+        ICFGNode* node = it->second;
+		// check if the call node's callee is src or sink
+		if (CallBlockNode* call = SVFUtil::dyn_cast<CallBlockNode>(node)){
+			const SVFFunction* fun = SVFUtil::getCallee(call->getCallSite());
+			if(fun->getName().equals("src"))
+				srcNode = node;
+			else if(fun->getName().equals("sink"))
+				sinkNode = node;
+		}
+	}
+	outs() << "srcID:"<< srcNode->getId()<<"\n\n";
+	outs() << "sinkID:"<< sinkNode->getId()<<"\n\n";
+}
 
 
 int main(int argc, char ** argv) {
@@ -196,15 +216,18 @@ int main(int argc, char ** argv) {
     /// ICFG
     ICFG *icfg = pag->getICFG ();
     icfg->dump ("icfg");
-    //give a src and a sink NodeID to the generate all following paths
-    ICFGNode *srcNode = icfg->getICFGNode (16);
-    ICFGNode *sinkNode = icfg->getICFGNode (19);
+	// init the src and sink node 
+	initSrc_and_Sink(icfg);
     stack<ICFGNode *> nStack;
 //    mark for the status of node in nStack
     set<const ICFGNode *> visited;
     //store for node sequence
     vector<const ICFGNode *> seq;
-    dfs_on_icfg (srcNode, sinkNode, visited, seq, nStack);
+	if( srcNode!= NULL && sinkNode != NULL){
+		dfs_on_icfg (srcNode, sinkNode, visited, seq, nStack);
+	}else{
+		outs() << "src or sink not found! \n";
+	}
 
     /// Value-Flow Graph (VFG)
     VFG *vfg = new VFG (callgraph);
@@ -227,4 +250,3 @@ int main(int argc, char ** argv) {
 
     return 0;
 }
-
