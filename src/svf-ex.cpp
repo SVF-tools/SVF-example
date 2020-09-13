@@ -137,14 +137,11 @@ void traverseOnVFG(const SVFG* vfg, Value* val){
 }
 
 //traverse from src node to sink node give the all paths
-void dfs_on_icfg(ICFGNode* src, ICFGNode* sink, set<const ICFGNode*>& visited, vector<const ICFGNode*>& seq, stack<ICFGNode*>& nStack)
+void DfsOnICFG(ICFGNode* src,ICFGNode* snk, vector<const ICFGNode*>& seq, set<const ICFGNode*>& visited)
 {
-    //mark the status
     visited.insert(src);
-    nStack.push(src);
     seq.push_back(src);
-    //exit
-    if (src->getId()==sink->getId())
+    if (src->getId()==snk->getId())
     {
         //output the sequence
         for (const ICFGNode* & eit : seq){
@@ -152,35 +149,41 @@ void dfs_on_icfg(ICFGNode* src, ICFGNode* sink, set<const ICFGNode*>& visited, v
         }
         cout << "\n";
     }
-    //dfs
     for ( auto it = src->OutEdgeBegin(); it != src->OutEdgeEnd(); it ++) {
         ICFGNode *cur = (*it)->getDstNode();
         if (visited.find(cur) == visited.end()) {
-            dfs_on_icfg(cur, sink, visited, seq, nStack);
+            DfsOnICFG(cur, snk, seq,visited);
         }
     }
-    //backTracing
     visited.erase(src);
-    nStack.pop();
     seq.pop_back();
 }
 
-//analyze and init the src and sink node from the icfg 
-void initSrc_and_Sink(ICFG *icfg){
-	for(ICFG::iterator it = icfg->begin(), eit = icfg->end(); it!=eit; ++it)
+void FindSrcSinkPaths(ICFG *icfg){
+    ICFGNode *srcNode,*sinkNode;
+    for(ICFG::iterator it = icfg->begin(), eit = icfg->end(); it!=eit; ++it)
     {
         ICFGNode* node = it->second;
-		// check if the call node's callee is src or sink
-		if (CallBlockNode* call = SVFUtil::dyn_cast<CallBlockNode>(node)){
-			const SVFFunction* fun = SVFUtil::getCallee(call->getCallSite());
-			if(fun->getName().equals("src"))
-				srcNode = node;
-			else if(fun->getName().equals("sink"))
-				sinkNode = node;
-		}
-	}
-	outs() << "srcID:"<< srcNode->getId()<<"\n\n";
-	outs() << "sinkID:"<< sinkNode->getId()<<"\n\n";
+        // check if the call node's callee is src or sink
+        if (CallBlockNode* call = SVFUtil::dyn_cast<CallBlockNode>(node)){
+            const SVFFunction* fun = SVFUtil::getCallee(call->getCallSite());
+            if(fun->getName().equals("src")){
+                srcNode = node;}
+            else if(fun->getName().equals("sink"))
+                sinkNode = node;
+        }
+    }
+    if( srcNode!= NULL && sinkNode != NULL){
+        outs() << "ICFG Source Node and Sink Node found: \n" << "srcID:"<<
+        srcNode->getId()<< "\tsinkID:"<< sinkNode->getId() << "\n" << "Path(s)：\n";
+        //mark for the status of node in seq
+        set<const ICFGNode *> visited;
+        //store for node sequence
+        vector<const ICFGNode *> seq;
+        DfsOnICFG(srcNode, sinkNode,seq,visited);
+    }else {
+        outs() << "src or sink not found! \n";
+    }
 }
 
 
@@ -216,18 +219,8 @@ int main(int argc, char ** argv) {
     /// ICFG
     ICFG *icfg = pag->getICFG ();
     icfg->dump ("icfg");
-	// init the src and sink node 
-	initSrc_and_Sink(icfg);
-    stack<ICFGNode *> nStack;
-//    mark for the status of node in nStack
-    set<const ICFGNode *> visited;
-    //store for node sequence
-    vector<const ICFGNode *> seq;
-	if( srcNode!= NULL && sinkNode != NULL){
-		dfs_on_icfg (srcNode, sinkNode, visited, seq, nStack);
-	}else{
-		outs() << "src or sink not found! \n";
-	}
+	// find all paths from source node to sink node
+	FindSrcSinkPaths(icfg);
 
     /// Value-Flow Graph (VFG)
     VFG *vfg = new VFG (callgraph);
