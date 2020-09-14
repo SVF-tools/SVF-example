@@ -137,7 +137,7 @@ void traverseOnVFG(const SVFG* vfg, Value* val){
 }
 
 //traverse from src node to sink node give the all paths
-void DfsOnICFG(ICFGNode* src,ICFGNode* snk, vector<const ICFGNode*>& seq, set<const ICFGNode*>& visited)
+void dfsOnICFG(ICFGNode* src,ICFGNode* snk, vector<const ICFGNode*>& seq, set<const ICFGNode*>& visited)
 {
     visited.insert(src);
     seq.push_back(src);
@@ -152,14 +152,14 @@ void DfsOnICFG(ICFGNode* src,ICFGNode* snk, vector<const ICFGNode*>& seq, set<co
     for ( auto it = src->OutEdgeBegin(); it != src->OutEdgeEnd(); it ++) {
         ICFGNode *cur = (*it)->getDstNode();
         if (visited.find(cur) == visited.end()) {
-            DfsOnICFG(cur, snk, seq,visited);
+            dfsOnICFG(cur, snk, seq,visited);
         }
     }
     visited.erase(src);
     seq.pop_back();
 }
 
-void FindSrcSinkPaths(ICFG *icfg){
+void findSrcSinkPaths(ICFG *icfg){
     ICFGNode *srcNode,*sinkNode;
     for(ICFG::iterator it = icfg->begin(), eit = icfg->end(); it!=eit; ++it)
     {
@@ -180,7 +180,7 @@ void FindSrcSinkPaths(ICFG *icfg){
         set<const ICFGNode *> visited;
         //store for node sequence
         vector<const ICFGNode *> seq;
-        DfsOnICFG(srcNode, sinkNode,seq,visited);
+        dfsOnICFG(srcNode, sinkNode,seq,visited);
     }else {
         outs() << "src or sink not found! \n";
     }
@@ -220,7 +220,7 @@ int main(int argc, char ** argv) {
     ICFG *icfg = pag->getICFG ();
     icfg->dump ("icfg");
 	// find all paths from source node to sink node
-	FindSrcSinkPaths(icfg);
+	findSrcSinkPaths(icfg);
 
     /// Value-Flow Graph (VFG)
     VFG *vfg = new VFG (callgraph);
