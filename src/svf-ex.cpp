@@ -32,7 +32,6 @@
 #include "SABER/LeakChecker.h"
 #include "SVF-FE/PAGBuilder.h"
 
-
 using namespace SVF;
 using namespace llvm;
 using namespace std;
@@ -45,6 +44,13 @@ static llvm::cl::opt<bool> LEAKCHECKER("leak", llvm::cl::init(false),
 
 ICFGNode *srcNode = NULL;
 ICFGNode *sinkNode = NULL;
+typedef PTData<NodeID,PointsTo> PTDataTy;
+typedef DiffPTData<NodeID,PointsTo,EdgeID> DiffPTDataTy;
+ConstraintGraph * consCG;
+FIFOWorkList<NodeID> pta_worklist;
+PTDataTy* ptD;
+PAG *pag;
+
 
 /*!
  * An example to query alias results of two LLVM values
@@ -186,7 +192,227 @@ void findSrcSinkPaths(ICFG *icfg){
     }
 }
 
+NodeID sccRepNode(NodeID id){
+    return consCG->sccRepNode(id);
+}
 
+bool addPts(NodeID id, NodeID ptd){
+    return ptD->addPts(id,ptd);
+}
+
+PointsTo& getPts(NodeID id){
+    id = sccRepNode(id);
+    return ptD -> getPts(id);
+}
+
+bool unionPts(NodeID id, const PointsTo& target){
+    id = sccRepNode(id);
+    return ptD->unionPts(id, target);
+}
+
+//Process copy edges: src --copy--> dst, union pts(dst) with pts(src)
+bool processCopy(NodeID node, const ConstraintEdge* edge)
+{
+    assert((SVFUtil::isa<CopyCGEdge>(edge)) && "not copy/call/ret ??");
+    PointsTo& srcPts = getPts(node);
+    NodeID dst = edge->getDstID();
+    bool changed = unionPts(dst, srcPts);
+    if (changed)
+        pta_worklist.push(sccRepNode(dst));
+    return changed;
+}
+
+void setObjFieldInsensitive(NodeID id)
+{
+    MemObj* mem =  const_cast<MemObj*>(pag->getBaseObj(id));
+    mem->setFieldInsensitive();
+}
+
+bool isFieldInsensitive(NodeID id)
+{
+    const MemObj* mem =  pag->getBaseObj(id);
+    return mem->isFieldInsensitive();
+}
+
+void addTypeForGepObjNode(NodeID, const NormalGepCGEdge*)
+{
+    return;
+}
+
+bool matchType(NodeID, NodeID, const NormalGepCGEdge*)
+{
+    return true;
+}
+
+bool processGepPts(PointsTo& pts, const GepCGEdge* edge)
+{
+    PointsTo tmpDstPts;
+    for (PointsTo::iterator piter = pts.begin(), epiter = pts.end(); piter != epiter; ++piter)
+    {
+        /// get the object
+        NodeID ptd = *piter;
+        /// handle blackhole and constant
+        if (consCG->isBlkObjOrConstantObj(ptd))
+        {
+            tmpDstPts.set(*piter);
+        }
+        else
+        {
+            /// handle variant gep edge
+            /// If a pointer connected by a variant gep edge,
+            /// then set this memory object to be field insensitive
+            if (SVFUtil::isa<VariantGepCGEdge>(edge))
+            {
+                if (isFieldInsensitive(ptd) == false)
+                {
+                    setObjFieldInsensitive(ptd);
+                    consCG->addNodeToBeCollapsed(consCG->getBaseObjNode(ptd));
+                }
+                // add the field-insensitive node into pts.
+                NodeID baseId = consCG->getFIObjNode(ptd);
+                tmpDstPts.set(baseId);
+            }
+            /// Otherwise process invariant (normal) gep
+            // TODO: after the node is set to field insensitive, handling invaraint gep edge may lose precision
+            // because offset here are ignored, and it always return the base obj
+            else if (const NormalGepCGEdge* normalGepEdge = SVFUtil::dyn_cast<NormalGepCGEdge>(edge))
+            {
+                if (!matchType(edge->getSrcID(), ptd, normalGepEdge))
+                    continue;
+                NodeID fieldSrcPtdNode = consCG->getGepObjNode(ptd,	normalGepEdge->getLocationSet());
+                tmpDstPts.set(fieldSrcPtdNode);
+                addTypeForGepObjNode(fieldSrcPtdNode, normalGepEdge);
+            }
+            else
+            {
+                assert(false && "new gep edge?");
+            }
+        }
+    }
+
+    NodeID dstId = edge->getDstID();
+    if (unionPts(dstId, tmpDstPts))
+    {
+        pta_worklist.push(sccRepNode(dstId));
+        return true;
+    }
+    return false;
+}
+
+bool processGep(NodeID node, const GepCGEdge* edge){
+    PointsTo& srcPts = getPts(node);
+    return processGepPts(srcPts, edge);
+}
+
+bool isNonPointerObj(NodeID ptd)
+{
+    return pag->isNonPointerObj(ptd);
+}
+
+/// Handle propagated points-to set.
+void updatePropaPts(NodeID dstId, NodeID srcId){
+    NodeID srcRep = sccRepNode(srcId);
+    NodeID dstRep = sccRepNode(dstId);
+    SVFUtil::cast<DiffPTDataTy>(ptD)->updatePropaPtsMap(srcRep, dstRep);
+}
+
+/// Add copy edge on constraint graph
+bool addCopyEdge(NodeID src, NodeID dst){
+    if (consCG->addCopyCGEdge(src, dst))
+    {
+        updatePropaPts(src, dst);
+        return true;
+    }
+    return false;
+}
+
+//Process load edges: src --load--> dst, node in pts(src) ==>  node--copy-->dst
+bool processLoad(NodeID node, const ConstraintEdge* load){
+    if (pag->isConstantObj(node) || isNonPointerObj(node))
+        return false;
+    NodeID dst = load->getDstID();
+    return addCopyEdge(node, dst);
+}
+
+//Process store edges: node in pts(dst) ==>  src--copy-->node
+bool processStore(NodeID node, const ConstraintEdge* store){
+    if (pag->isConstantObj(node) || isNonPointerObj(node))
+        return false;
+    NodeID src = store->getSrcID();
+    return addCopyEdge(src, node);
+}
+
+void processAddr(const AddrCGEdge* addr)
+{
+    NodeID dst = addr->getDstID();
+    NodeID src = addr->getSrcID();
+    if(addPts(dst,src))
+        pta_worklist.push(sccRepNode(dst));
+}
+
+//init and add all addr nodes to the worklist
+void processAllAddr(){
+    for (ConstraintGraph::const_iterator nodeIt = consCG->begin(), nodeEit = consCG->end(); nodeIt != nodeEit; nodeIt++)
+    {
+        ConstraintNode * cgNode = nodeIt->second;
+        for (ConstraintNode::const_iterator it = cgNode->incomingAddrsBegin(), eit = cgNode->incomingAddrsEnd();
+                it != eit; ++it)
+            processAddr(SVFUtil::cast<AddrCGEdge>(*it));
+    }
+}
+
+void handleCopyGep(ConstraintNode* node){
+    NodeID nodeId = node->getId();
+    for (ConstraintEdge* edge : node->getCopyOutEdges()){
+        processCopy(nodeId, edge);
+    }
+    for (ConstraintEdge* edge : node->getGepOutEdges())
+    {
+        if (GepCGEdge* gepEdge = SVFUtil::dyn_cast<GepCGEdge>(edge))
+            processGep(nodeId, gepEdge);
+    }
+}
+
+void handleLoadStore(ConstraintNode *node){
+    NodeID nodeId = node->getId();
+    for (PointsTo::iterator piter = getPts(nodeId).begin(), epiter = getPts(nodeId).end(); piter != epiter; ++piter)
+    {
+        NodeID ptd = *piter;
+        // handle load
+        for (ConstraintNode::const_iterator it = node->outgoingLoadsBegin(), eit = node->outgoingLoadsEnd(); it != eit; ++it)
+        {
+            if (processLoad(ptd, *it))
+                pta_worklist.push(sccRepNode(ptd));
+        }
+
+        // handle store
+        for (ConstraintNode::const_iterator it = node->incomingStoresBegin(), eit = node->incomingStoresEnd(); it != eit; ++it)
+        {
+            if (processStore(ptd, *it))
+                pta_worklist.push(sccRepNode((*it)->getSrcID()));
+        }
+    }
+}
+
+void pointToAnalysis(){
+    consCG = new ConstraintGraph(pag);
+    outs()<< "consCG initial\n";
+    consCG->dump("consCG_initial");
+    // Initialize worklist
+    processAllAddr();
+    while (!pta_worklist.empty()){
+        NodeID nodeId = sccRepNode(pta_worklist.pop());
+        // sub nodes do not need to be processed
+        if (sccRepNode(nodeId) != nodeId)
+            return;
+        ConstraintNode* node = consCG->getConstraintNode(nodeId);
+        handleLoadStore(node);
+        handleCopyGep(node);
+    }
+    outs()<< "consCG finalize\n";
+    consCG->dump("consCG_final");
+    consCG->print();
+}
 int main(int argc, char ** argv) {
 
     int arg_num = 0;
@@ -200,7 +426,7 @@ int main(int argc, char ** argv) {
 
     /// Build Program Assignment Graph (PAG)
     PAGBuilder builder;
-    PAG *pag = builder.build (svfModule);
+    pag = builder.build (svfModule);
     pag->dump ("pag");
 
     /// Create Andersen's pointer analysis
@@ -239,7 +465,6 @@ int main(int argc, char ** argv) {
 
     LeakChecker *saber = new LeakChecker (); // if no checker is specified, we use leak checker as the default one.
     saber->runOnModule (svfModule);
-	
-
+	pointToAnalysis();
     return 0;
 }
