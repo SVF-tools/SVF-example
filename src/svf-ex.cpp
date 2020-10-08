@@ -55,28 +55,28 @@ AliasResult aliasQuery(PointerAnalysis* pta, Value* v1, Value* v2){
 	return pta->alias(v1,v2);
 }
 
-// /*!
-//  * An example to print points-to set of an LLVM value
-//  */
-// std::string printPts(PointerAnalysis* pta, Value* val){
+/*!
+ * An example to print points-to set of an LLVM value
+ */
+std::string printPts(PointerAnalysis* pta, Value* val){
 
-//     std::string str;
-//     raw_string_ostream rawstr(str);
+    std::string str;
+    raw_string_ostream rawstr(str);
 
-//     NodeID pNodeId = pta->getPAG()->getValueNode(val);
-//     NodeBS& pts = pta->getPts(pNodeId);
-//     for (NodeBS::iterator ii = pts.begin(), ie = pts.end();
-//             ii != ie; ii++) {
-//         rawstr << " " << *ii << " ";
-//         PAGNode* targetObj = pta->getPAG()->getPAGNode(*ii);
-//         if(targetObj->hasValue()){
-//             rawstr << "(" <<*targetObj->getValue() << ")\t ";
-//         }
-//     }
+    NodeID pNodeId = pta->getPAG()->getValueNode(val);
+    const NodeBS& pts = pta->getPts(pNodeId);
+    for (NodeBS::iterator ii = pts.begin(), ie = pts.end();
+            ii != ie; ii++) {
+        rawstr << " " << *ii << " ";
+        PAGNode* targetObj = pta->getPAG()->getPAGNode(*ii);
+        if(targetObj->hasValue()){
+            rawstr << "(" <<*targetObj->getValue() << ")\t ";
+        }
+    }
 
-//     return rawstr.str();
+    return rawstr.str();
 
-// }
+}
 
 
 /*!

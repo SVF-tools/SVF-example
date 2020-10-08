@@ -135,7 +135,6 @@ void Andersen_pta::handleLoadStore(ConstraintNode *node){
 
 void Andersen_pta::pointToAnalysis(){
     consCG = new ConstraintGraph(pag);
-    // outs()<< "consCG initial\n";
     consCG->dump("consCG_initial");
     // Initialize worklist
     processAllAddr();
@@ -148,7 +147,6 @@ void Andersen_pta::pointToAnalysis(){
         handleLoadStore(node);
         handleCopyGep(node);
     }
-    // outs()<< "consCG finalize\n";
     consCG->dump("consCG_final");
     consCG->print();
 }
