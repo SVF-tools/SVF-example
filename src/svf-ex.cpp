@@ -163,6 +163,8 @@ void dfsOnICFG(ICFGNode* src,ICFGNode* snk, vector<const ICFGNode*>& seq, set<co
 
 void findSrcSinkPaths(ICFG *icfg){
     ICFGNode *srcNode,*sinkNode;
+    srcNode = NULL;
+    sinkNode = NULL;
     for(ICFG::iterator it = icfg->begin(), eit = icfg->end(); it!=eit; ++it)
     {
         ICFGNode* node = it->second;
@@ -170,7 +172,8 @@ void findSrcSinkPaths(ICFG *icfg){
         if (CallBlockNode* call = SVFUtil::dyn_cast<CallBlockNode>(node)){
             const SVFFunction* fun = SVFUtil::getCallee(call->getCallSite());
             if(fun->getName().equals("src")){
-                srcNode = node;}
+                srcNode = node;
+            }
             else if(fun->getName().equals("sink"))
                 sinkNode = node;
         }
