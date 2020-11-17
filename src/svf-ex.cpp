@@ -127,9 +127,12 @@ void traverseOnVFG(const SVFG* vfg, Value* val){
     /// Collect all LLVM Values
     for(std::set<const VFGNode*>::const_iterator it = visited.begin(), eit = visited.end(); it!=eit; ++it){
     	const VFGNode* node = *it;
-    	/// can only query VFGNode involving top-level pointers (starting with % or @ in LLVM IR)
-    	/// PAGNode* pNode = vfg->getLHSTopLevPtr(node);
-    	/// Value* val = pNode->getValue();
+    //SVFUtil::outs() << *node << "\n";
+        /// can only query VFGNode involving top-level pointers (starting with % or @ in LLVM IR)
+        //if(!SVFUtil::isa<MRSVFGNode>(node)){
+        //    const PAGNode* pNode = vfg->getLHSTopLevPtr(node);
+        //    const Value* val = pNode->getValue();
+        //}
     }
 }
 
