@@ -188,7 +188,7 @@ int main(int argc, char ** argv) {
 		saber->runOnModule(svfModule);
 	
 
-		LLVMModuleSet::getLLVMModuleSet()->dumpModulesToFile(".svf");
+		LLVMModuleSet::getLLVMModuleSet()->dumpModulesToFile(".svf.ll");
 
     return 0;
 }
