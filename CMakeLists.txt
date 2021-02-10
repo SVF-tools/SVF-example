@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.4.3)
-Project(SVF-example)
 if (DEFINED LLVM_DIR)
         set(ENV{LLVM_DIR} "${LLVM_DIR}")
     endif()
