@@ -1,6 +1,6 @@
 llvm_map_components_to_libnames(llvm_libs bitwriter core ipo irreader instcombine instrumentation target linker analysis scalaropts support )
-set(SOURCES
-    svf-ex.cpp
+file (GLOB SOURCES
+   *.cpp
 )
 add_executable(svf-ex ${SOURCES})
 
