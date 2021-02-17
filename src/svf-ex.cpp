@@ -59,7 +59,7 @@ std::string printPts(PointerAnalysis* pta, Value* val){
     raw_string_ostream rawstr(str);
 
     NodeID pNodeId = pta->getPAG()->getValueNode(val);
-    NodeBS& pts = pta->getPts(pNodeId);
+    const NodeBS& pts = pta->getPts(pNodeId);
     for (NodeBS::iterator ii = pts.begin(), ie = pts.end();
             ii != ie; ii++) {
         rawstr << " " << *ii << " ";
@@ -127,9 +127,12 @@ void traverseOnVFG(const SVFG* vfg, Value* val){
     /// Collect all LLVM Values
     for(std::set<const VFGNode*>::const_iterator it = visited.begin(), eit = visited.end(); it!=eit; ++it){
     	const VFGNode* node = *it;
-    	/// can only query VFGNode involving top-level pointers (starting with % or @ in LLVM IR)
-    	/// PAGNode* pNode = vfg->getLHSTopLevPtr(node);
-    	/// Value* val = pNode->getValue();
+    //SVFUtil::outs() << *node << "\n";
+        /// can only query VFGNode involving top-level pointers (starting with % or @ in LLVM IR)
+        //if(!SVFUtil::isa<MRSVFGNode>(node)){
+        //    const PAGNode* pNode = vfg->getLHSTopLevPtr(node);
+        //    const Value* val = pNode->getValue();
+        //}
     }
 }
 
@@ -184,6 +187,8 @@ int main(int argc, char ** argv) {
 		LeakChecker *saber = new LeakChecker(); // if no checker is specified, we use leak checker as the default one.
 		saber->runOnModule(svfModule);
 	
+
+		LLVMModuleSet::getLLVMModuleSet()->dumpModulesToFile(".svf.bc");
 
     return 0;
 }
