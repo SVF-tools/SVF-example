@@ -42,8 +42,13 @@ endif()
 
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
     MESSAGE (STATUS "building SVF in debug mode")
-    set(SVF_LIB "${SVF_DIR}/Debug-build/lib/libSvf.a")
-    set(LLVMCudd "${SVF_DIR}/Debug-build/lib/CUDD/libCudd.a")
+    if (EXISTS "${SVF_DIR}/Debug-build")
+        set(SVF_LIB "${SVF_DIR}/Debug-build/lib/libSvf.a")
+    	set(LLVMCudd "${SVF_DIR}/Debug-build/lib/CUDD/libCudd.a")
+    else()
+        set(SVF_LIB "${SVF_DIR}/Release-build/lib/libSvf.a")
+        set(LLVMCudd "${SVF_DIR}/Release-build/lib/CUDD/libCudd.a")
+    endif()
 else()
     MESSAGE (STATUS "building SVF in release mode")
     set(SVF_LIB "${SVF_DIR}/Release-build/lib/libSvf.a")
@@ -51,7 +56,6 @@ else()
 endif()
 set(SVF_HEADER "${SVF_DIR}/include")
 include_directories(${SVF_HEADER})
-
 
 
 add_subdirectory(src)

@@ -188,6 +188,8 @@ int main(int argc, char ** argv) {
 		saber->runOnModule(svfModule);
 	
 
+		LLVMModuleSet::getLLVMModuleSet()->dumpModulesToFile(".svf.bc");
+
     return 0;
 }
 

@@ -19,5 +19,5 @@ make
 ```
 ## 4. Analyze a bc file using svf-ex executable
 ```
-./bin/svf-ex example.bc
+./bin/svf-ex example.ll
 ```
