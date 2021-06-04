@@ -2,7 +2,7 @@
 
 PROJECTHOME=$(pwd)
 sysOS=`uname -s`
-LLVMHome="llvm-10.0.0.obj"
+LLVMHome="llvm-12.0.0.obj"
 install_path=`npm root`
 export LLVM_DIR=$install_path/$LLVMHome
 export PATH=$LLVM_DIR/bin:$PATH

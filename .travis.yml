@@ -9,7 +9,7 @@ matrix:
       install:
         - npm install svf-lib
     - os: osx
-      osx_image: xcode11.5
+      osx_image: xcode12.4
       install:
        - npm install svf-lib
 
