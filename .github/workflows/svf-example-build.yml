@@ -24,6 +24,6 @@ jobs:
 
       - name: build-svf
         run: |
-         source $TRAVIS_BUILD_DIR/env.sh
+         source $GITHUB_WORKSPACE/env.sh
          cmake .
          make 
