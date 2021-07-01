@@ -19,5 +19,6 @@ make
 ```
 ## 4. Analyze a bc file using svf-ex executable
 ```
+clang -S -c -g -fno-discard-value-names -emit-llvm example.c -o example.ll
 ./bin/svf-ex example.ll
 ```
