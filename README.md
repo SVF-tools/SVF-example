@@ -14,8 +14,7 @@ source ./env.sh
 ```
 cmake the project (`cmake -DCMAKE_BUILD_TYPE=Debug .` for debug build)
 ```
-cmake .
-make
+cmake . && make
 ```
 ## 4. Analyze a bc file using svf-ex executable
 ```
