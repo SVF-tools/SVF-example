@@ -146,8 +146,9 @@ int main(int argc, char ** argv) {
                                 "Whole Program Points-to Analysis\n");
 
     SVFModule* svfModule = LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
-
-    /// Build Program Assignment Graph (PAG)
+    svfModule->buildSymbolTableInfo();
+    
+	/// Build Program Assignment Graph (PAG)
 		PAGBuilder builder;
 		PAG *pag = builder.build(svfModule);
 		pag->dump("pag");
