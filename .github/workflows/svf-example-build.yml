@@ -27,3 +27,7 @@ jobs:
          source $GITHUB_WORKSPACE/env.sh
          cmake .
          make 
+         git clone https://github.com/SVF-tools/Test-Suite.git $GITHUB_WORKSPACE/Test-Suite
+         ls $GITHUB_WORKSPACE/Test-Suite/test_cases_bc/crux-bc/curl.bc
+         echo $GITHUB_WORKSPACE/bin/svf-ex -pt-type=cbv $GITHUB_WORKSPACE/Test-Suite/test_cases_bc/crux-bc/curl.bc
+         $GITHUB_WORKSPACE/bin/svf-ex -pt-type=cbv $GITHUB_WORKSPACE/Test-Suite/test_cases_bc/crux-bc/curl.bc
