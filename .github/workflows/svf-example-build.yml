@@ -15,14 +15,30 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 12
+          
       # setup the environment 
+      - name: mac-setup
+        if: runner.os == 'macOS'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: 12.5.1
+      - name: mac-setup-workaround
+        if: runner.os == 'macOS'
+        run: ln -sfn /Applications/Xcode_12.5.1.app /Applications/Xcode.app
+      - name: ubuntu-setup
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install cmake gcc g++ nodejs doxygen graphviz
+          
+      # install llvm and svf
       - name: env-setup
         run: |
           npm install svf-lib
-          if [ "$RUNNER_OS" = "macOS" ]; then export SDKROOT="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk" ; fi
-          if [ "$RUNNER_OS" = "Linux" ]; then sudo apt-get update       ; fi
-          if [ "$RUNNER_OS" = "Linux" ]; then sudo apt-get install cmake gcc g++; fi
-
+          
+      # build current repo
       - name: build-svf
         run: |
          source $GITHUB_WORKSPACE/env.sh
