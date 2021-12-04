@@ -19,6 +19,7 @@ jobs:
       - name: env-setup
         run: |
           npm install svf-lib
+          if [ "$RUNNER_OS" = "macOS" ]; then export SDKROOT="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk" ; fi
           if [ "$RUNNER_OS" = "Linux" ]; then sudo apt-get update       ; fi
           if [ "$RUNNER_OS" = "Linux" ]; then sudo apt-get install cmake gcc g++; fi
 
