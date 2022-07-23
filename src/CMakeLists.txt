@@ -4,7 +4,7 @@ file (GLOB SOURCES
 )
 add_executable(svf-ex ${SOURCES})
 
-target_link_libraries(svf-ex ${SVF_LIB} ${LLVMCudd} ${llvm_libs})
+target_link_libraries(svf-ex ${SVF_LIB} ${llvm_libs})
 target_link_libraries(svf-ex ${Z3_LIBRARIES})
 set_target_properties( svf-ex PROPERTIES
                        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
