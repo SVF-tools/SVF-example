@@ -26,10 +26,10 @@
  // Author: Yulei Sui,
  */
 
-#include "SVF-FE/LLVMUtil.h"
+#include "SVF-LLVM/LLVMUtil.h"
 #include "Graphs/SVFG.h"
 #include "WPA/Andersen.h"
-#include "SVF-FE/SVFIRBuilder.h"
+#include "SVF-LLVM/SVFIRBuilder.h"
 #include "Util/Options.h"
 
 using namespace llvm;
@@ -44,7 +44,10 @@ static llvm::cl::opt<std::string> InputFilename(cl::Positional,
  */
 SVF::AliasResult aliasQuery(PointerAnalysis* pta, Value* v1, Value* v2)
 {
-    return pta->alias(v1,v2);
+    SVFValue* val1 = LLVMModuleSet::getLLVMModuleSet()->getSVFValue(v1);
+    SVFValue* val2 = LLVMModuleSet::getLLVMModuleSet()->getSVFValue(v2);
+
+    return pta->alias(val1,val2);
 }
 
 /*!
@@ -55,8 +58,9 @@ std::string printPts(PointerAnalysis* pta, Value* val)
 
     std::string str;
     raw_string_ostream rawstr(str);
+    SVFValue* svfval = LLVMModuleSet::getLLVMModuleSet()->getSVFValue(val);
 
-    NodeID pNodeId = pta->getPAG()->getValueNode(val);
+    NodeID pNodeId = pta->getPAG()->getValueNode(svfval);
     const PointsTo& pts = pta->getPts(pNodeId);
     for (PointsTo::iterator ii = pts.begin(), ie = pts.end();
             ii != ie; ii++)
@@ -65,7 +69,7 @@ std::string printPts(PointerAnalysis* pta, Value* val)
         PAGNode* targetObj = pta->getPAG()->getGNode(*ii);
         if(targetObj->hasValue())
         {
-            rawstr << "(" <<*targetObj->getValue() << ")\t ";
+            rawstr << "(" << targetObj->getValue()->toString() << ")\t ";
         }
     }
 
@@ -79,7 +83,9 @@ std::string printPts(PointerAnalysis* pta, Value* val)
  */
 void traverseOnICFG(ICFG* icfg, const Instruction* inst)
 {
-    ICFGNode* iNode = icfg->getICFGNode(inst);
+    SVFInstruction* svfinst = LLVMModuleSet::getLLVMModuleSet()->getSVFInstruction(inst);
+
+    ICFGNode* iNode = icfg->getICFGNode(svfinst);
     FIFOWorkList<const ICFGNode*> worklist;
     Set<const ICFGNode*> visited;
     worklist.push(iNode);
@@ -108,8 +114,9 @@ void traverseOnICFG(ICFG* icfg, const Instruction* inst)
 void traverseOnVFG(const SVFG* vfg, Value* val)
 {
     SVFIR* pag = SVFIR::getPAG();
+    SVFValue* svfval = LLVMModuleSet::getLLVMModuleSet()->getSVFValue(val);
 
-    PAGNode* pNode = pag->getGNode(pag->getValueNode(val));
+    PAGNode* pNode = pag->getGNode(pag->getValueNode(svfval));
     const VFGNode* vNode = vfg->getDefSVFGNode(pNode);
     FIFOWorkList<const VFGNode*> worklist;
     Set<const VFGNode*> visited;
@@ -158,7 +165,6 @@ int main(int argc, char ** argv)
     }
 
     SVFModule* svfModule = LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
-    svfModule->buildSymbolTableInfo();
 
     /// Build Program Assignment Graph (SVFIR)
     SVFIRBuilder builder(svfModule);
