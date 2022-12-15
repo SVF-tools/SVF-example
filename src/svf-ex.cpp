@@ -159,7 +159,7 @@ int main(int argc, char ** argv)
     cl::ParseCommandLineOptions(arg_num, arg_value,
                                 "Whole Program Points-to Analysis\n");
     
-    if (Options::WriteAnder == "ir_annotator")
+    if (Options::WriteAnder() == "ir_annotator")
     {
         LLVMModuleSet::getLLVMModuleSet()->preProcessBCs(moduleNameVec);
     }
