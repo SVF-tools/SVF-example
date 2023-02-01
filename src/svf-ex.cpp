@@ -200,7 +200,6 @@ int main(int argc, char ** argv)
 
     // clean up memory
     delete vfg;
-    delete svfg;
     AndersenWaveDiff::releaseAndersenWaveDiff();
     SVFIR::releaseSVFIR();
 
