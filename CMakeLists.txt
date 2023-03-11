@@ -83,7 +83,7 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
 else()
     find_library(Z3_LIBRARIES NAMES libz3.a libz3.so
             HINTS $ENV{Z3_DIR}
-            PATH_SUFFIXES bin)
+            PATH_SUFFIXES lib)
     find_path(Z3_INCLUDES NAMES z3++.h
             HINTS $ENV{Z3_DIR}
             PATH_SUFFIXES include z3)
