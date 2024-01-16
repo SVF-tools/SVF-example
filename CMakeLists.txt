@@ -33,7 +33,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 ${CMAKE_CXX_FLAGS_RELEASE}")
 add_compile_options("-Wall" "-Wextra" "-Wno-deprecated")
 
 # Find LLVM and the necessary build configuration for LLVM 15 (replace with different version if needed)
-find_package(LLVM 15.0.7 CONFIG HINTS ${LLVM_DIR} ENV LLVM_DIR)
+find_package(LLVM REQUIRED CONFIG HINTS ${LLVM_DIR} ENV LLVM_DIR)
 message(STATUS "LLVM STATUS:
     Found:                      ${LLVM_FOUND}
     Version:                    ${LLVM_VERSION}
@@ -90,7 +90,7 @@ if(NOT LLVM_ENABLE_EH)
 endif()
 
 # Find specifically SVF 2.7 (change if needed) prioritising locations pointed to by $SVF_DIR
-find_package(SVF 2.7 CONFIG HINTS ${SVF_DIR} ENV SVF_DIR)
+find_package(SVF REQUIRED CONFIG HINTS ${SVF_DIR} ENV SVF_DIR)
 message(STATUS "SVF STATUS:
     Found:                              ${SVF_FOUND}
     Version:                            ${SVF_VERSION}
@@ -127,7 +127,7 @@ include_directories(SYSTEM ${SVF_INSTALL_INCLUDE_DIR})
 link_directories(${SVF_INSTALL_LIB_DIR})
 
 # Search for system Z3 with CMake support first; otherwise try to find Z3 downloaded/installed by SVF's build script
-find_package(Z3 4.8.8 CONFIG PATHS ${Z3_DIR} ENV Z3_DIR)
+find_package(Z3 REQUIRED CONFIG PATHS ${Z3_DIR} ENV Z3_DIR)
 message(STATUS "Z3 STATUS:
     Z3 found:                   ${Z3_FOUND}
     Z3 version:                 ${Z3_VERSION}
