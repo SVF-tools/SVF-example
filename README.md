@@ -1,7 +1,7 @@
-## 0. Install npm, zlib, unzip, cmake, gcc, nodejs (skip this step if you machine has these libs)
+## 0. Install npm, zlib, unzip, cmake, gcc, nodejs wget (skip this step if you machine has these libs)
 
 ```
-sudo apt-get install zlib1g-dev unzip cmake gcc g++ libtinfo5 nodejs 
+sudo apt-get install zlib1g-dev unzip cmake gcc g++ libtinfo5 nodejs wget
 ```
 
 ## 1. Install SVF and its dependence (LLVM pre-built binary) via npm
