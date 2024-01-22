@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.23)
 
 # Define the SVF example project
 project(svf-ex
+    VERSION 1.0
     DESCRIPTION "Example project for how to use SVF as an external library"
     HOMEPAGE_URL "https://github.com/SVF-tools/SVF-example"
     LANGUAGES C CXX)
@@ -90,7 +91,7 @@ if(NOT LLVM_ENABLE_EH)
 endif()
 
 # Find specifically SVF 2.7 (change if needed) prioritising locations pointed to by $SVF_DIR
-find_package(SVF REQUIRED CONFIG HINTS ${SVF_DIR} ENV SVF_DIR)
+find_package(SVF CONFIG HINTS ${SVF_DIR} ENV SVF_DIR)
 message(STATUS "SVF STATUS:
     Found:                              ${SVF_FOUND}
     Version:                            ${SVF_VERSION}
@@ -104,27 +105,60 @@ message(STATUS "SVF STATUS:
     Install include directory:          ${SVF_INSTALL_INCLUDE_DIR}
     Install 'extapi.bc' file path:      ${SVF_INSTALL_EXTAPI_FILE}")
 
-# Ensure SVF was found
+# If the SVF CMake package was found, show how to use some "modern" features of this approach; otherwise use old system
 if(NOT "${SVF_FOUND}")
-    message(FATAL_ERROR "Failed to find correct SVF version; cannot build VeriPatch!")
-endif()
+    message(STATUS "Found installed SVF instance; importing using modern CMake methods")
 
-# Print a warning if the build types are mismatched
-if(NOT (${SVF_BUILD_TYPE} STREQUAL ${CMAKE_BUILD_TYPE}))
-    message(WARNING "Current & SVF build types don't match (SVF: ${SVF_BUILD_TYPE}, current: ${CMAKE_BUILD_TYPE})!")
-endif()
+    # Print a warning if the build types are mismatched
+    if(NOT (${SVF_BUILD_TYPE} STREQUAL ${CMAKE_BUILD_TYPE}))
+        message(WARNING "Current & SVF build types don't match (SVF: ${SVF_BUILD_TYPE}, current: ${CMAKE_BUILD_TYPE})!")
+    endif()
 
-# Check that SVF & the found LLVM instance match w.r.t. RTTI/exception handling support
-if(NOT (${SVF_ENABLE_RTTI} STREQUAL ${LLVM_ENABLE_RTTI}))
-    message(FATAL_ERROR "SVF & LLVM RTTI support mismatch (SVF: ${SVF_ENABLE_RTTI}, LLVM: ${LLVM_ENABLE_RTTI})!")
-endif()
-if(NOT (${SVF_ENABLE_EXCEPTIONS} STREQUAL ${LLVM_ENABLE_EH}))
-    message(FATAL_ERROR "SVF & LLVM exceptions support mismatch (SVF: ${SVF_ENABLE_EXCEPTIONS}, LLVM: ${LLVM_ENABLE_EH})!")
-endif()
+    # Check that SVF & the found LLVM instance match w.r.t. RTTI/exception handling support
+    if(NOT (${SVF_ENABLE_RTTI} STREQUAL ${LLVM_ENABLE_RTTI}))
+        message(FATAL_ERROR "SVF & LLVM RTTI support mismatch (SVF: ${SVF_ENABLE_RTTI}, LLVM: ${LLVM_ENABLE_RTTI})!")
+    endif()
+    if(NOT (${SVF_ENABLE_EXCEPTIONS} STREQUAL ${LLVM_ENABLE_EH}))
+        message(FATAL_ERROR "SVF & LLVM exceptions support mismatch (SVF: ${SVF_ENABLE_EXCEPTIONS}, LLVM: ${LLVM_ENABLE_EH})!")
+    endif()
 
-# Include SVF's include directories for all targets & include the library directories to find the library objects
-include_directories(SYSTEM ${SVF_INSTALL_INCLUDE_DIR})
-link_directories(${SVF_INSTALL_LIB_DIR})
+    # Include SVF's include directories for all targets & include the library directories to find the library objects
+    include_directories(SYSTEM ${SVF_INSTALL_INCLUDE_DIR})
+    link_directories(${SVF_INSTALL_LIB_DIR})
+else()
+    message(STATUS "Failed to find installed SVF instance; using legacy import method")
+
+    if (EXISTS "${SVF_DIR}")
+    else()
+        set(SVF_DIR $ENV{SVF_DIR})
+        if(EXISTS "${SVF_DIR}")
+        else()
+        message(FATAL_ERROR
+            "WARNING: The SVF_DIR var was not set (required for an out-of-source build)!
+            Please set this to environment variable to point to the SVF_DIR directory or set this variable to cmake configuration
+            (e.g. on linux: export SVF_DIR=/path/to/SVF/dir) or (make the project via: cmake -DSVF_DIR=your_path_to_SVF)")
+        endif()
+    endif()
+
+    if(CMAKE_BUILD_TYPE MATCHES "Debug")
+        MESSAGE (STATUS "building SVF in debug mode")
+        if (EXISTS "${SVF_DIR}/Debug-build")
+            set(SVF_BIN "${SVF_DIR}/Debug-build")
+        else()
+            set(SVF_BIN "${SVF_DIR}/Release-build")
+        endif()
+    else()
+        MESSAGE (STATUS "building SVF in release mode")
+        set(SVF_BIN "${SVF_DIR}/Release-build")
+    endif()
+    set(SVF_HEADER "${SVF_DIR}/svf/include")
+    set(SVF_LLVM_HEADER "${SVF_DIR}/svf-llvm/include")
+    set(SVF_LIB "${SVF_BIN}/svf-llvm/libSvfLLVM.a" "${SVF_BIN}/svf/libSvfCore.a")
+    set(SVF_BIN_HEADER "${SVF_BIN}/include")
+    include_directories(${SVF_HEADER}
+                        ${SVF_LLVM_HEADER}
+                        ${SVF_BIN_HEADER})
+endif()
 
 # Search for system Z3 with CMake support first; otherwise try to find Z3 downloaded/installed by SVF's build script
 find_package(Z3 REQUIRED CONFIG PATHS ${Z3_DIR} ENV Z3_DIR)
