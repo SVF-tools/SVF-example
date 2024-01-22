@@ -82,13 +82,19 @@ include(AddLLVM)
 
 # LLVM is normally built without RTTI. Be consistent with that.
 if(NOT LLVM_ENABLE_RTTI)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+    add_compile_options("-fno-rtti")
 endif()
 
 # The same applies for exception handling
 if(NOT LLVM_ENABLE_EH)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions")
+    add_compile_options("-fno-exceptions")
 endif()
+
+# Define the actual runtime executable
+add_llvm_executable(svf-example src/svf-ex.cpp)
+
+# Link the LLVM libraries (single dynamic library/multiple static libraries) to the example executable
+target_link_libraries(svf-example PUBLIC ${llvm_libs})
 
 # Find specifically SVF 2.7 (change if needed) prioritising locations pointed to by $SVF_DIR
 find_package(SVF CONFIG HINTS ${SVF_DIR} ENV SVF_DIR)
@@ -125,6 +131,9 @@ if("${SVF_FOUND}")
     # Include SVF's include directories for all targets & include the library directories to find the library objects
     include_directories(SYSTEM ${SVF_INSTALL_INCLUDE_DIR})
     link_directories(${SVF_INSTALL_LIB_DIR})
+
+    # Actually link the SVF libraries to the example executable
+    target_link_libraries(svf-example PUBLIC SvfCore SvfLLVM)
 else()
     message(STATUS "Failed to find installed SVF instance; using legacy import method")
 
@@ -140,6 +149,7 @@ else()
         endif()
     endif()
 
+    # Retrieve the appropriate build directory
     if(CMAKE_BUILD_TYPE MATCHES "Debug")
         MESSAGE (STATUS "building SVF in debug mode")
         if (EXISTS "${SVF_DIR}/Debug-build")
@@ -151,13 +161,26 @@ else()
         MESSAGE (STATUS "building SVF in release mode")
         set(SVF_BIN "${SVF_DIR}/Release-build")
     endif()
+
+    # Get the include directories & add them to all targets
     set(SVF_HEADER "${SVF_DIR}/svf/include")
     set(SVF_LLVM_HEADER "${SVF_DIR}/svf-llvm/include")
-    set(SVF_LIB "${SVF_BIN}/svf-llvm/libSvfLLVM.a" "${SVF_BIN}/svf/libSvfCore.a")
     set(SVF_BIN_HEADER "${SVF_BIN}/include")
-    include_directories(${SVF_HEADER}
-                        ${SVF_LLVM_HEADER}
-                        ${SVF_BIN_HEADER})
+    include_directories(
+        SYSTEM
+            ${SVF_HEADER}
+            ${SVF_LLVM_HEADER}
+            ${SVF_BIN_HEADER}
+    )
+
+    # Link the library files by full path (dynamic or static)
+    if (EXISTS "${SVF_BIN}/svf/libSvfCore.a" AND EXISTS "${SVF_BIN}/svf-llvm/libSvfLLVM.a")
+        target_link_libraries(svf-example PUBLIC "${SVF_BIN}/svf-llvm/libSvfLLVM.a" "${SVF_BIN}/svf/libSvfCore.a")
+    elseif(EXISTS "${SVF_BIN}/svf/libSvfCore.so" AND EXISTS "${SVF_BIN}/svf-llvm/libSvfLLVM.so")
+        target_link_libraries(svf-example PUBLIC "${SVF_BIN}/svf-llvm/libSvfLLVM.so" "${SVF_BIN}/svf/libSvfCore.so")
+    else()
+        message(FATAL_ERROR "Failed to find static/dynamic library files for SVF!")
+    endif()
 endif()
 
 # Search for system Z3 with CMake support first; otherwise try to find Z3 downloaded/installed by SVF's build script
@@ -170,6 +193,7 @@ message(STATUS "Z3 STATUS:
 
 if(Z3_FOUND)
     include_directories(SYSTEM ${Z3_CXX_INCLUDE_DIRS})
+    target_link_libraries(svf-example PUBLIC z3)
 else()
     message(STATUS "No system Z3 CMake package found; using SVF's Z3 instance")
     find_library(Z3_LIBRARIES
@@ -191,6 +215,7 @@ else()
     # Getting Z3 from GitHub places compiled library files in /bin, so add that as a search directory
     include_directories(SYSTEM ${Z3_INCLUDES})
     link_directories(${Z3_DIR}/bin)
-endif()
 
-add_subdirectory(src)
+    # Actually link Z3 to the example binary
+    target_link_libraries(svf-example PUBLIC z3)
+endif()
