@@ -161,7 +161,7 @@ else()
 endif()
 
 # Search for system Z3 with CMake support first; otherwise try to find Z3 downloaded/installed by SVF's build script
-find_package(Z3 REQUIRED CONFIG PATHS ${Z3_DIR} ENV Z3_DIR)
+find_package(Z3 CONFIG PATHS ${Z3_DIR} ENV Z3_DIR)
 message(STATUS "Z3 STATUS:
     Z3 found:                   ${Z3_FOUND}
     Z3 version:                 ${Z3_VERSION}
