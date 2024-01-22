@@ -106,7 +106,7 @@ message(STATUS "SVF STATUS:
     Install 'extapi.bc' file path:      ${SVF_INSTALL_EXTAPI_FILE}")
 
 # If the SVF CMake package was found, show how to use some "modern" features of this approach; otherwise use old system
-if(NOT "${SVF_FOUND}")
+if("${SVF_FOUND}")
     message(STATUS "Found installed SVF instance; importing using modern CMake methods")
 
     # Print a warning if the build types are mismatched
