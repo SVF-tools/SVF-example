@@ -36,9 +36,6 @@ using namespace llvm;
 using namespace std;
 using namespace SVF;
 
-static llvm::cl::opt<std::string> InputFilename(cl::Positional,
-        llvm::cl::desc("<input bitcode>"), llvm::cl::init("-"));
-
 /*!
  * An example to query alias results of two LLVM values
  */
@@ -152,19 +149,17 @@ void traverseOnVFG(const SVFG* vfg, Value* val)
 int main(int argc, char ** argv)
 {
 
-    int arg_num = 0;
-    char **arg_value = new char*[argc];
     std::vector<std::string> moduleNameVec;
-    LLVMUtil::processArguments(argc, argv, arg_num, arg_value, moduleNameVec);
-    cl::ParseCommandLineOptions(arg_num, arg_value,
-                                "Whole Program Points-to Analysis\n");
-    
+    moduleNameVec = OptionBase::parseOptions(
+            argc, argv, "Whole Program Points-to Analysis", "[options] <input-bitcode...>"
+    );
+
     if (Options::WriteAnder() == "ir_annotator")
     {
-        LLVMModuleSet::getLLVMModuleSet()->preProcessBCs(moduleNameVec);
+        LLVMModuleSet::preProcessBCs(moduleNameVec);
     }
 
-    SVFModule* svfModule = LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
+    SVFModule* svfModule = LLVMModuleSet::buildSVFModule(moduleNameVec);
 
     /// Build Program Assignment Graph (SVFIR)
     SVFIRBuilder builder(svfModule);
