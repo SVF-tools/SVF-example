@@ -27,10 +27,10 @@
  */
 
 #include "SVF-LLVM/LLVMUtil.h"
-#include "Graphs/SVFG.h"
-#include "WPA/Andersen.h"
+#include "SVF/Graphs/SVFG.h"
+#include "SVF/WPA/Andersen.h"
 #include "SVF-LLVM/SVFIRBuilder.h"
-#include "Util/Options.h"
+#include "SVF/Util/Options.h"
 
 using namespace llvm;
 using namespace std;

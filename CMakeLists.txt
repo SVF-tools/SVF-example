@@ -90,14 +90,14 @@ if(NOT LLVM_ENABLE_EH)
     add_compile_options("-fno-exceptions")
 endif()
 
-# Define the actual runtime executable
-add_llvm_executable(svf-example src/svf-ex.cpp)
-
-# Link the LLVM libraries (single dynamic library/multiple static libraries) to the example executable
-target_link_libraries(svf-example PUBLIC ${llvm_libs})
-
 # Find specifically SVF 2.7 (change if needed) prioritising locations pointed to by $SVF_DIR
-find_package(SVF CONFIG HINTS ${SVF_DIR} ENV SVF_DIR)
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  set(SVF_BUILD_DIR Debug-build)
+else()
+  set(SVF_BUILD_DIR Release-build)
+endif()
+
+find_package(SVF CONFIG HINTS ${SVF_DIR}/${SVF_BUILD_DIR})
 message(STATUS "SVF STATUS:
     Found:                              ${SVF_FOUND}
     Version:                            ${SVF_VERSION}
@@ -111,14 +111,15 @@ message(STATUS "SVF STATUS:
     Install include directory:          ${SVF_INSTALL_INCLUDE_DIR}
     Install 'extapi.bc' file path:      ${SVF_INSTALL_EXTAPI_FILE}")
 
+
+# Define the actual runtime executable
+llvm_map_components_to_libnames(llvm_libs bitwriter core ipo irreader instcombine instrumentation target linker analysis scalaropts support )
+
+add_executable(svf-example src/svf-ex.cpp)
+
 # If the SVF CMake package was found, show how to use some "modern" features of this approach; otherwise use old system
 if("${SVF_FOUND}")
     message(STATUS "Found installed SVF instance; importing using modern CMake methods")
-
-    # Print a warning if the build types are mismatched
-    if(NOT (${SVF_BUILD_TYPE} STREQUAL ${CMAKE_BUILD_TYPE}))
-        message(WARNING "Current & SVF build types don't match (SVF: ${SVF_BUILD_TYPE}, current: ${CMAKE_BUILD_TYPE})!")
-    endif()
 
     # Check that SVF & the found LLVM instance match w.r.t. RTTI/exception handling support
     if(NOT (${SVF_ENABLE_RTTI} STREQUAL ${LLVM_ENABLE_RTTI}))
@@ -131,9 +132,8 @@ if("${SVF_FOUND}")
     # Include SVF's include directories for all targets & include the library directories to find the library objects
     include_directories(SYSTEM ${SVF_INSTALL_INCLUDE_DIR})
     link_directories(${SVF_INSTALL_LIB_DIR})
-
-    # Actually link the SVF libraries to the example executable
-    target_link_libraries(svf-example PUBLIC SvfCore SvfLLVM)
+    # Link the LLVM libraries (single dynamic library/multiple static libraries) to the example executable
+    target_link_libraries(svf-example PUBLIC ${llvm_libs} SvfCore SvfLLVM)
 else()
     message(STATUS "Failed to find installed SVF instance; using legacy import method")
 
