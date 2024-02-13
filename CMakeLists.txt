@@ -136,51 +136,7 @@ if("${SVF_FOUND}")
     target_link_libraries(svf-example PUBLIC ${llvm_libs} SvfCore SvfLLVM)
 else()
     message(STATUS "Failed to find installed SVF instance; using legacy import method")
-
-    if (EXISTS "${SVF_DIR}")
-    else()
-        set(SVF_DIR $ENV{SVF_DIR})
-        if(EXISTS "${SVF_DIR}")
-        else()
-        message(FATAL_ERROR
-            "WARNING: The SVF_DIR var was not set (required for an out-of-source build)!
-            Please set this to environment variable to point to the SVF_DIR directory or set this variable to cmake configuration
-            (e.g. on linux: export SVF_DIR=/path/to/SVF/dir) or (make the project via: cmake -DSVF_DIR=your_path_to_SVF)")
-        endif()
-    endif()
-
-    # Retrieve the appropriate build directory
-    if(CMAKE_BUILD_TYPE MATCHES "Debug")
-        MESSAGE (STATUS "building SVF in debug mode")
-        if (EXISTS "${SVF_DIR}/Debug-build")
-            set(SVF_BIN "${SVF_DIR}/Debug-build")
-        else()
-            set(SVF_BIN "${SVF_DIR}/Release-build")
-        endif()
-    else()
-        MESSAGE (STATUS "building SVF in release mode")
-        set(SVF_BIN "${SVF_DIR}/Release-build")
-    endif()
-
-    # Get the include directories & add them to all targets
-    set(SVF_HEADER "${SVF_DIR}/svf/include")
-    set(SVF_LLVM_HEADER "${SVF_DIR}/svf-llvm/include")
-    set(SVF_BIN_HEADER "${SVF_BIN}/include")
-    include_directories(
-        SYSTEM
-            ${SVF_HEADER}
-            ${SVF_LLVM_HEADER}
-            ${SVF_BIN_HEADER}
-    )
-
-    # Link the library files by full path (dynamic or static)
-    if (EXISTS "${SVF_BIN}/svf/libSvfCore.a" AND EXISTS "${SVF_BIN}/svf-llvm/libSvfLLVM.a")
-        target_link_libraries(svf-example PUBLIC "${SVF_BIN}/svf-llvm/libSvfLLVM.a" "${SVF_BIN}/svf/libSvfCore.a")
-    elseif(EXISTS "${SVF_BIN}/svf/libSvfCore.so" AND EXISTS "${SVF_BIN}/svf-llvm/libSvfLLVM.so")
-        target_link_libraries(svf-example PUBLIC "${SVF_BIN}/svf-llvm/libSvfLLVM.so" "${SVF_BIN}/svf/libSvfCore.so")
-    else()
-        message(FATAL_ERROR "Failed to find static/dynamic library files for SVF!")
-    endif()
+    message(FATAL_ERROR "SVF & LLVM RTTI support mismatch (SVF: ${SVF_ENABLE_RTTI}, LLVM: ${LLVM_ENABLE_RTTI})!")
 endif()
 
 # Search for system Z3 with CMake support first; otherwise try to find Z3 downloaded/installed by SVF's build script
