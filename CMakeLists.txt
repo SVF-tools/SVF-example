@@ -1,49 +1,32 @@
 cmake_minimum_required(VERSION 3.23)
 
-# Define the SVF example project
-project(svf-ex
-    VERSION 1.0
-    DESCRIPTION "Example project for how to use SVF as an external library"
-    HOMEPAGE_URL "https://github.com/SVF-tools/SVF-example"
-    LANGUAGES C CXX)
+project(SVF-example
+        VERSION 1.0
+        DESCRIPTION "An external project example using SVF as a library"
+        HOMEPAGE_URL "https://github.com/SVF-tools/SVF-example"
+        LANGUAGES C CXX
+)
+if (DEFINED LLVM_DIR)
+        set(ENV{LLVM_DIR} "${LLVM_DIR}")
+    endif()
+    if (DEFINED ENV{LLVM_DIR})
+        # We need to match the build environment for LLVM:
+        # In particular, we need C++11 and the -fno-rtti flag
+        set(CMAKE_CXX_STANDARD 17)
+	if(CMAKE_BUILD_TYPE MATCHES "Debug")
+		set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++17 -O0 -fno-rtti -Wno-deprecated")
+	else()
+		set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++17 -O3 -fno-rtti -Wno-deprecated")
+	endif()
+	set(CMAKE_C_FLAGS "-fPIC")
 
-# Configure C & C++ standards for example project (doens't need to match LLVM/SVF)
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_C_EXTENSIONS ON)
-set(CMAKE_CXX_EXTENSIONS ON)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+find_package(LLVM REQUIRED CONFIG)
+    
+    list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
+    include(AddLLVM)
 
-# Enable Position Independent Code for generated binaries
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-# Default to release-build mode
-if(NOT CMAKE_BUILD_TYPE)
-    message(STATUS "No build mode specific; defaulting to \"Release\" build mode")
-    set(CMAKE_BUILD_TYPE Release)
-endif()
-
-# Add "-g" and no optimisation level if building in debug mode, otherwise add "-O3"
-set(CMAKE_C_FLAGS_DEBUG "-g ${CMAKE_C_FLAGS_DEBUG}")
-set(CMAKE_CXX_FLAGS_DEBUG "-g ${CMAKE_CXX_FLAGS_DEBUG}")
-set(CMAKE_C_FLAGS_RELEASE "-O3 ${CMAKE_C_FLAGS_RELEASE}")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 ${CMAKE_CXX_FLAGS_RELEASE}")
-
-# Ignore deprecated warnings; for the rest treat compiler warnings as errors
-add_compile_options("-Wall" "-Wextra" "-Wno-deprecated")
-
-# Find LLVM and the necessary build configuration for LLVM 15 (replace with different version if needed)
-find_package(LLVM REQUIRED CONFIG HINTS ${LLVM_DIR} ENV LLVM_DIR)
-message(STATUS "LLVM STATUS:
-    Found:                      ${LLVM_FOUND}
-    Version:                    ${LLVM_VERSION}
-    Definitions:                ${LLVM_DEFINITIONS}
-    Enable RTTI:                ${LLVM_ENABLE_RTTI}
-    Enable exceptions:          ${LLVM_ENABLE_EH}
-    Include directories:        ${LLVM_INCLUDE_DIRS}
-    Library directories:        ${LLVM_LIBRARY_DIRS}
-    LLVM targets to build:      ${LLVM_TARGETS_TO_BUILD}")
+    add_definitions(${LLVM_DEFINITIONS})
+    include_directories(${LLVM_INCLUDE_DIRS})
 
 if(NOT "${LLVM_FOUND}")
     message(FATAL_ERROR "Failed to find supported LLVM version")
