@@ -7,18 +7,20 @@ project(SVF-example
         LANGUAGES C CXX
 )
 if (DEFINED LLVM_DIR)
-        set(ENV{LLVM_DIR} "${LLVM_DIR}")
+    set(ENV{LLVM_DIR} "${LLVM_DIR}")
+endif()
+if (DEFINED ENV{LLVM_DIR})
+    # We need to match the build environment for LLVM:
+    # In particular, we need C++11 and the -fno-rtti flag
+    set(CMAKE_CXX_STANDARD 17)
+    if(CMAKE_BUILD_TYPE MATCHES "Debug")
+	set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++17 -O0 -fno-rtti -Wno-deprecated")
+    else()
+	set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++17 -O3 -fno-rtti -Wno-deprecated")
     endif()
-    if (DEFINED ENV{LLVM_DIR})
-        # We need to match the build environment for LLVM:
-        # In particular, we need C++11 and the -fno-rtti flag
-        set(CMAKE_CXX_STANDARD 17)
-	if(CMAKE_BUILD_TYPE MATCHES "Debug")
-		set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++17 -O0 -fno-rtti -Wno-deprecated")
-	else()
-		set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++17 -O3 -fno-rtti -Wno-deprecated")
-	endif()
-	set(CMAKE_C_FLAGS "-fPIC")
+    set(CMAKE_C_FLAGS "-fPIC")
+endif()
+
 
 find_package(LLVM REQUIRED CONFIG)
     
