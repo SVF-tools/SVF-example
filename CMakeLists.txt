@@ -106,7 +106,6 @@ message(STATUS "SVF STATUS:
 # Define the actual runtime executable
 llvm_map_components_to_libnames(llvm_libs bitwriter core ipo irreader instcombine instrumentation target linker analysis scalaropts support )
 
-add_executable(svf-example src/svf-ex.cpp)
 
 # If the SVF CMake package was found, show how to use some "modern" features of this approach; otherwise use old system
 if("${SVF_FOUND}")
@@ -124,7 +123,6 @@ if("${SVF_FOUND}")
     include_directories(SYSTEM ${SVF_INSTALL_INCLUDE_DIR})
     link_directories(${SVF_INSTALL_LIB_DIR})
     # Link the LLVM libraries (single dynamic library/multiple static libraries) to the example executable
-    target_link_libraries(svf-example PUBLIC ${llvm_libs} SvfCore SvfLLVM)
 else()
     message(STATUS "Failed to find installed SVF instance; using legacy import method")
     message(FATAL_ERROR "SVF & LLVM RTTI support mismatch (SVF: ${SVF_ENABLE_RTTI}, LLVM: ${LLVM_ENABLE_RTTI})!")
@@ -140,7 +138,6 @@ message(STATUS "Z3 STATUS:
 
 if(Z3_FOUND)
     include_directories(SYSTEM ${Z3_CXX_INCLUDE_DIRS})
-    target_link_libraries(svf-example PUBLIC z3)
 else()
     message(STATUS "No system Z3 CMake package found; using SVF's Z3 instance")
     find_library(Z3_LIBRARIES
@@ -164,5 +161,5 @@ else()
     link_directories(${Z3_DIR}/bin)
 
     # Actually link Z3 to the example binary
-    target_link_libraries(svf-example PUBLIC z3)
 endif()
+add_subdirectory(src)
