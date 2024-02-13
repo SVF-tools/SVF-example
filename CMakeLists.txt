@@ -23,12 +23,18 @@ endif()
 
 
 find_package(LLVM REQUIRED CONFIG)
-    
-    list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
-    include(AddLLVM)
+message(STATUS "LLVM STATUS:
+  Version       ${LLVM_VERSION}
+  Includes      ${LLVM_INCLUDE_DIRS}
+  Libraries     ${LLVM_LIBRARY_DIRS}
+  Build type    ${LLVM_BUILD_TYPE}
+  Dynamic lib   ${LLVM_LINK_LLVM_DYLIB}"
+)    
+list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
+include(AddLLVM)
 
-    add_definitions(${LLVM_DEFINITIONS})
-    include_directories(${LLVM_INCLUDE_DIRS})
+add_definitions(${LLVM_DEFINITIONS})
+include_directories(${LLVM_INCLUDE_DIRS})
 
 if(NOT "${LLVM_FOUND}")
     message(FATAL_ERROR "Failed to find supported LLVM version")
