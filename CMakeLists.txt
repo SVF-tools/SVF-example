@@ -14,9 +14,9 @@ if (DEFINED ENV{LLVM_DIR})
     # In particular, we need C++11 and the -fno-rtti flag
     set(CMAKE_CXX_STANDARD 17)
     if(CMAKE_BUILD_TYPE MATCHES "Debug")
-	set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++17 -O0 -fno-rtti -Wno-deprecated")
+        set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++17 -O0 -fno-rtti -Wno-deprecated")
     else()
-	set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++17 -O3 -fno-rtti -Wno-deprecated")
+        set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++17 -O3 -fno-rtti -Wno-deprecated")
     endif()
     set(CMAKE_C_FLAGS "-fPIC")
 endif()
@@ -29,7 +29,7 @@ message(STATUS "LLVM STATUS:
   Libraries     ${LLVM_LIBRARY_DIRS}
   Build type    ${LLVM_BUILD_TYPE}
   Dynamic lib   ${LLVM_LINK_LLVM_DYLIB}"
-)    
+)
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 include(AddLLVM)
 
@@ -53,17 +53,17 @@ if(LLVM_LINK_LLVM_DYLIB)
 else()
     message(STATUS "Linking to separate LLVM static libraries")
     llvm_map_components_to_libnames(llvm_libs
-        bitwriter
-        core
-        ipo
-        irreader
-        instcombine
-        instrumentation
-        target
-        linker
-        analysis
-        scalaropts
-        support
+            bitwriter
+            core
+            ipo
+            irreader
+            instcombine
+            instrumentation
+            target
+            linker
+            analysis
+            scalaropts
+            support
     )
 endif()
 
@@ -82,8 +82,19 @@ if(NOT LLVM_ENABLE_EH)
 endif()
 
 # Find specifically SVF 2.7 (change if needed) prioritising locations pointed to by $SVF_DIR
+if(CMAKE_BUILD_TYPE MATCHES "Debug")
+    MESSAGE (STATUS "building SVF in debug mode")
+    if (EXISTS "${SVF_DIR}/Debug-build")
+        set(SVF_BIN "${SVF_DIR}/Debug-build")
+    else()
+        set(SVF_BIN "${SVF_DIR}/Release-build")
+    endif()
+else()
+    MESSAGE (STATUS "building SVF in release mode")
+    set(SVF_BIN "${SVF_DIR}/Release-build")
+endif()
 
-find_package(SVF CONFIG HINTS ${SVF_DIR})
+find_package(SVF CONFIG HINTS ${SVF_DIR} ${SVF_BIN})
 message(STATUS "SVF STATUS:
     Found:                              ${SVF_FOUND}
     Version:                            ${SVF_VERSION}
@@ -123,6 +134,7 @@ else()
     message(FATAL_ERROR "SVF & LLVM RTTI support mismatch (SVF: ${SVF_ENABLE_RTTI}, LLVM: ${LLVM_ENABLE_RTTI})!")
 endif()
 
+set(SVF_LIB SvfLLVM SvfCore)
 # Search for system Z3 with CMake support first; otherwise try to find Z3 downloaded/installed by SVF's build script
 find_package(Z3 CONFIG PATHS ${Z3_DIR} ENV Z3_DIR)
 message(STATUS "Z3 STATUS:
@@ -136,14 +148,14 @@ if(Z3_FOUND)
 else()
     message(STATUS "No system Z3 CMake package found; using SVF's Z3 instance")
     find_library(Z3_LIBRARIES
-        NAMES libz3.a libz3.so
-        HINTS ${Z3_DIR} ENV Z3_DIR
-        PATH_SUFFIXES bin
+            NAMES libz3.a libz3.so
+            HINTS ${Z3_DIR} ENV Z3_DIR
+            PATH_SUFFIXES bin
     )
     find_path(Z3_INCLUDES
-        NAMES z3++.h
-        HINTS ${Z3_DIR} ENV Z3_DIR
-        PATH_SUFFIXES include
+            NAMES z3++.h
+            HINTS ${Z3_DIR} ENV Z3_DIR
+            PATH_SUFFIXES include
     )
 
     # Ensure this Z3 instance was actually found
