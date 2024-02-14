@@ -82,13 +82,8 @@ if(NOT LLVM_ENABLE_EH)
 endif()
 
 # Find specifically SVF 2.7 (change if needed) prioritising locations pointed to by $SVF_DIR
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-  set(SVF_BUILD_DIR Debug-build)
-else()
-  set(SVF_BUILD_DIR Release-build)
-endif()
 
-find_package(SVF CONFIG HINTS ${SVF_DIR}/${SVF_BUILD_DIR})
+find_package(SVF CONFIG HINTS ${SVF_DIR})
 message(STATUS "SVF STATUS:
     Found:                              ${SVF_FOUND}
     Version:                            ${SVF_VERSION}
