@@ -6,8 +6,15 @@ project(SVF-example
         HOMEPAGE_URL "https://github.com/SVF-tools/SVF-example"
         LANGUAGES C CXX
 )
+# Check if the LLVM_DIR environment variable is defined and set it accordingly
 if (DEFINED LLVM_DIR)
     set(ENV{LLVM_DIR} "${LLVM_DIR}")
+elseif (DEFINED ENV{LLVM_DIR})
+    set(LLVM_DIR $ENV{LLVM_DIR})
+else()
+    message(FATAL_ERROR "\
+WARNING: The LLVM_DIR var was not set !\n\
+Please set this to environment variable to point to the LLVM_DIR directory or set this variable to cmake configuration\n(e.g. on linux: export LLVM_DIR=/path/to/LLVM/dir) \n or \n \n(make the project via: cmake -DLLVM_DIR=your_path_to_LLVM) ")
 endif()
 if (DEFINED ENV{LLVM_DIR})
     # We need to match the build environment for LLVM:
@@ -79,6 +86,18 @@ endif()
 # The same applies for exception handling
 if(NOT LLVM_ENABLE_EH)
     add_compile_options("-fno-exceptions")
+endif()
+
+# Check if the SVF_DIR environment variable is defined and set it accordingly
+if (DEFINED SVF_DIR)
+    set(ENV{SVF_DIR} "${SVF_DIR}")
+elseif (DEFINED ENV{SVF_DIR})
+    set(SVF_DIR $ENV{SVF_DIR})
+else()
+    message(FATAL_ERROR "\
+WARNING: The SVF_DIR var was not set !\n\
+Please set this to environment variable to point to the SVF_DIR directory or set this variable to cmake configuration\n
+(e.g. on linux: export SVF_DIR=/path/to/SVF/dir) \n or \n \n(make the project via: cmake -DSVF_DIR=your_path_to_SVF) ")
 endif()
 
 # Find specifically SVF 2.7 (change if needed) prioritising locations pointed to by $SVF_DIR
