@@ -175,7 +175,7 @@ int main(int argc, char ** argv)
     /// printPts(ander, value1);
 
     /// Call Graph
-    CallGraph* callgraph = ander->getPTACallGraph();
+    CallGraph* callgraph = ander->getCallGraph();
 
     /// ICFG
     ICFG* icfg = pag->getICFG();
