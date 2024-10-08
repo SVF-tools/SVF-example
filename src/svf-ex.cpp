@@ -80,9 +80,8 @@ std::string printPts(PointerAnalysis* pta, Value* val)
  */
 void traverseOnICFG(ICFG* icfg, const Instruction* inst)
 {
-    SVFInstruction* svfinst = LLVMModuleSet::getLLVMModuleSet()->getSVFInstruction(inst);
+    const ICFGNode* iNode = LLVMModuleSet::getLLVMModuleSet()->getICFGNode(inst);
 
-    ICFGNode* iNode = icfg->getICFGNode(svfinst);
     FIFOWorkList<const ICFGNode*> worklist;
     Set<const ICFGNode*> visited;
     worklist.push(iNode);
