@@ -41,10 +41,12 @@ using namespace SVF;
  */
 SVF::AliasResult aliasQuery(PointerAnalysis* pta, Value* v1, Value* v2)
 {
-    SVFValue* val1 = LLVMModuleSet::getLLVMModuleSet()->getSVFValue(v1);
-    SVFValue* val2 = LLVMModuleSet::getLLVMModuleSet()->getSVFValue(v2);
 
-    return pta->alias(val1,val2);
+    SVFLLVMValue* val1 = LLVMModuleSet::getLLVMModuleSet()->getSVFValue(v1);
+    SVFLLVMValue* val2 = LLVMModuleSet::getLLVMModuleSet()->getSVFValue(v2);
+    NodeID id1 =  LLVMModuleSet::getLLVMModuleSet()->getValueNode(val1);
+    NodeID id2 =  LLVMModuleSet::getLLVMModuleSet()->getValueNode(val2);
+    return pta->alias(id1, id2);
 }
 
 /*!
@@ -55,19 +57,16 @@ std::string printPts(PointerAnalysis* pta, Value* val)
 
     std::string str;
     raw_string_ostream rawstr(str);
-    SVFValue* svfval = LLVMModuleSet::getLLVMModuleSet()->getSVFValue(val);
+    SVFLLVMValue* svfval = LLVMModuleSet::getLLVMModuleSet()->getSVFValue(val);
 
-    NodeID pNodeId = pta->getPAG()->getValueNode(svfval);
+    NodeID pNodeId = LLVMModuleSet::getLLVMModuleSet()->getValueNode(svfval);
     const PointsTo& pts = pta->getPts(pNodeId);
     for (PointsTo::iterator ii = pts.begin(), ie = pts.end();
             ii != ie; ii++)
     {
         rawstr << " " << *ii << " ";
         PAGNode* targetObj = pta->getPAG()->getGNode(*ii);
-        if(targetObj->hasValue())
-        {
-            rawstr << "(" << targetObj->getValue()->toString() << ")\t ";
-        }
+        rawstr << "(" << targetObj->toString() << ")\t ";
     }
 
     return rawstr.str();
@@ -110,9 +109,9 @@ void traverseOnICFG(ICFG* icfg, const Instruction* inst)
 void traverseOnVFG(const SVFG* vfg, Value* val)
 {
     SVFIR* pag = SVFIR::getPAG();
-    SVFValue* svfval = LLVMModuleSet::getLLVMModuleSet()->getSVFValue(val);
+    SVFLLVMValue* svfval = LLVMModuleSet::getLLVMModuleSet()->getSVFValue(val);
 
-    PAGNode* pNode = pag->getGNode(pag->getValueNode(svfval));
+    PAGNode* pNode = pag->getGNode(LLVMModuleSet::getLLVMModuleSet()->getValueNode(svfval));
     const VFGNode* vNode = vfg->getDefSVFGNode(pNode);
     FIFOWorkList<const VFGNode*> worklist;
     Set<const VFGNode*> visited;

@@ -1,7 +1,10 @@
 name: svf-example
 
-# Triggers the workflow on push or pull request events
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  repository_dispatch:
+    types: [new-commit-from-SVF]
 
 jobs:
   build:
@@ -41,7 +44,7 @@ jobs:
           npm install svf-lib
           
       # build current repo
-      - name: build-svf
+      - name: build-svf-example
         run: |
          source $GITHUB_WORKSPACE/env.sh
          cmake .
