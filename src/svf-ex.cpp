@@ -39,27 +39,21 @@ using namespace SVF;
 /*!
  * An example to query alias results of two LLVM values
  */
-SVF::AliasResult aliasQuery(PointerAnalysis* pta, Value* v1, Value* v2)
+SVF::AliasResult aliasQuery(PointerAnalysis* pta, const SVFVar* v1, const SVFVar* v2)
 {
-
-    SVFLLVMValue* val1 = LLVMModuleSet::getLLVMModuleSet()->getSVFValue(v1);
-    SVFLLVMValue* val2 = LLVMModuleSet::getLLVMModuleSet()->getSVFValue(v2);
-    NodeID id1 =  LLVMModuleSet::getLLVMModuleSet()->getValueNode(val1);
-    NodeID id2 =  LLVMModuleSet::getLLVMModuleSet()->getValueNode(val2);
-    return pta->alias(id1, id2);
+    return pta->alias(v1->getId(), v2->getId());
 }
 
 /*!
  * An example to print points-to set of an LLVM value
  */
-std::string printPts(PointerAnalysis* pta, Value* val)
+std::string printPts(PointerAnalysis* pta, const SVFVar* svfval)
 {
 
     std::string str;
     raw_string_ostream rawstr(str);
-    SVFLLVMValue* svfval = LLVMModuleSet::getLLVMModuleSet()->getSVFValue(val);
 
-    NodeID pNodeId = LLVMModuleSet::getLLVMModuleSet()->getValueNode(svfval);
+    NodeID pNodeId = svfval->getId();
     const PointsTo& pts = pta->getPts(pNodeId);
     for (PointsTo::iterator ii = pts.begin(), ie = pts.end();
             ii != ie; ii++)
@@ -106,13 +100,11 @@ void traverseOnICFG(ICFG* icfg, const Instruction* inst)
 /*!
  * An example to query/collect all the uses of a definition of a value along value-flow graph (VFG)
  */
-void traverseOnVFG(const SVFG* vfg, Value* val)
+void traverseOnVFG(const SVFG* vfg, const SVFVar* svfval)
 {
-    SVFIR* pag = SVFIR::getPAG();
-    SVFLLVMValue* svfval = LLVMModuleSet::getLLVMModuleSet()->getSVFValue(val);
-
-    PAGNode* pNode = pag->getGNode(LLVMModuleSet::getLLVMModuleSet()->getValueNode(svfval));
-    const VFGNode* vNode = vfg->getDefSVFGNode(pNode);
+    if (!vfg->hasDefSVFGNode(svfval))
+        return;
+    const VFGNode* vNode = vfg->getDefSVFGNode(svfval);
     FIFOWorkList<const VFGNode*> worklist;
     Set<const VFGNode*> visited;
     worklist.push(vNode);
@@ -138,6 +130,7 @@ void traverseOnVFG(const SVFG* vfg, Value* val)
     for(Set<const VFGNode*>::const_iterator it = visited.begin(), eit = visited.end(); it!=eit; ++it)
     {
         const VFGNode* node = *it;
+        dummyVisit(node);
         /// can only query VFGNode involving top-level pointers (starting with % or @ in LLVM IR)
         /// PAGNode* pNode = vfg->getLHSTopLevPtr(node);
         /// Value* val = pNode->getValue();
