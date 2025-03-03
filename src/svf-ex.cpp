@@ -97,6 +97,10 @@ void traverseOnICFG(ICFG* icfg, const Instruction* inst)
     }
 }
 
+void dummyVisit(const VFGNode* node)
+{
+
+}
 /*!
  * An example to query/collect all the uses of a definition of a value along value-flow graph (VFG)
  */
