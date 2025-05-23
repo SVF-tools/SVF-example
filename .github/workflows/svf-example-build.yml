@@ -46,6 +46,9 @@ jobs:
       # build current repo
       - name: build-svf-example
         run: |
+          export SVF_DIR=$(npm root)/SVF
+          export LLVM_DIR=$(npm root)/llvm-16.0.0.obj
+          export Z3_DIR=$(npm root)/z3.obj
           cmake -B build -S ./ --install-prefix=$GITHUB_WORKSPACE
           cmake --build build --verbose
           cmake --install build --verbose

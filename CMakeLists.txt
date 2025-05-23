@@ -18,6 +18,19 @@ find_package(
   ${SVF_DIR}
   $ENV{SVF_DIR})
 
+message(STATUS "SVF STATUS:
+    Found:                              ${SVF_FOUND}
+    Version:                            ${SVF_VERSION}
+    Build mode:                         ${SVF_BUILD_TYPE}
+    C++ standard:                       ${SVF_CXX_STANDARD}
+    RTTI enabled:                       ${SVF_ENABLE_RTTI}
+    Exceptions enabled:                 ${SVF_ENABLE_EXCEPTIONS}
+    Install root directory:             ${SVF_INSTALL_ROOT}
+    Install binary directory:           ${SVF_INSTALL_BIN_DIR}
+    Install library directory:          ${SVF_INSTALL_LIB_DIR}
+    Install include directory:          ${SVF_INSTALL_INCLUDE_DIR}
+    Install 'extapi.bc' file path:      ${SVF_INSTALL_EXTAPI_FILE}")
+
 # Define the primary (minimal) example using SVF as library in an executable
 add_executable(svf-example src/svf-example.cpp)
 
