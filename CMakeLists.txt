@@ -9,14 +9,14 @@ project(
 
 # Find the SVF CMake package (pass $SVF_DIR as a (prioritised) hint) Set
 # $SVF_DIR to the installation prefix used to install SVF
+message("SVF_DIR : ${SVF_DIR}")
 find_package(
   SVF
-  3.0
   REQUIRED
   CONFIG
   HINTS
-  ${SVF_DIR}
-  $ENV{SVF_DIR})
+  $ENV{SVF_DIR}
+  ${SVF_DIR})
 
 message(STATUS "SVF STATUS:
     Found:                              ${SVF_FOUND}
@@ -30,6 +30,35 @@ message(STATUS "SVF STATUS:
     Install library directory:          ${SVF_INSTALL_LIB_DIR}
     Install include directory:          ${SVF_INSTALL_INCLUDE_DIR}
     Install 'extapi.bc' file path:      ${SVF_INSTALL_EXTAPI_FILE}")
+
+# Locate and use the LLVM package for the project
+find_package(LLVM REQUIRED CONFIG)
+message(STATUS "LLVM STATUS:
+  Version       ${LLVM_VERSION}
+  Includes      ${LLVM_INCLUDE_DIRS}
+  Libraries     ${LLVM_LIBRARY_DIRS}
+  Build type    ${LLVM_BUILD_TYPE}
+  Dynamic lib   ${LLVM_LINK_LLVM_DYLIB}"
+)
+
+
+# Find and configure Z3 package, first trying the system Z3 with CMake, then fallback to SVF's Z3 instance
+# Find Z3 and its include directory from the top-level include file
+find_library(
+        Z3_LIBRARIES
+        REQUIRED
+        NAMES z3
+        HINTS ${Z3_DIR} ENV Z3_DIR
+        PATH_SUFFIXES bin lib)
+find_path(
+        Z3_INCLUDES
+        REQUIRED
+        NAMES z3++.h
+        HINTS ${Z3_DIR} ENV Z3_DIR
+        PATH_SUFFIXES include z3)
+message(STATUS "Z3 STATUS:
+  Z3 library file:        ${Z3_LIBRARIES}
+  Z3 include directory:   ${Z3_INCLUDES}")
 
 # Define the primary (minimal) example using SVF as library in an executable
 add_executable(svf-example src/svf-example.cpp)
