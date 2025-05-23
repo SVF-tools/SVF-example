@@ -34,11 +34,11 @@ message(STATUS "SVF STATUS:
 # Locate and use the LLVM package for the project
 find_package(LLVM REQUIRED CONFIG)
 message(STATUS "LLVM STATUS:
-  Version       ${LLVM_VERSION}
-  Includes      ${LLVM_INCLUDE_DIRS}
-  Libraries     ${LLVM_LIBRARY_DIRS}
-  Build type    ${LLVM_BUILD_TYPE}
-  Dynamic lib   ${LLVM_LINK_LLVM_DYLIB}"
+    Version                             ${LLVM_VERSION}
+    Includes                            ${LLVM_INCLUDE_DIRS}
+    Libraries                           ${LLVM_LIBRARY_DIRS}
+    Build type                          ${LLVM_BUILD_TYPE}
+    Dynamic lib                         ${LLVM_LINK_LLVM_DYLIB}"
 )
 
 
@@ -57,8 +57,9 @@ find_path(
         HINTS ${Z3_DIR} ENV Z3_DIR
         PATH_SUFFIXES include z3)
 message(STATUS "Z3 STATUS:
-  Z3 library file:        ${Z3_LIBRARIES}
-  Z3 include directory:   ${Z3_INCLUDES}")
+    Z3 library file:                    ${Z3_LIBRARIES}
+    Z3 include directory:               ${Z3_INCLUDES}"
+  )
 
 # Define the primary (minimal) example using SVF as library in an executable
 add_executable(svf-example src/svf-example.cpp)
