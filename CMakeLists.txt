@@ -35,18 +35,17 @@ if (DEFINED ENV{LLVM_DIR})
     endif()
 endif()
 
+
 # Locate and use the LLVM package for the project
 find_package(LLVM REQUIRED CONFIG)
-# If on Linux, force enable LLVM exception handling
-if(UNIX AND NOT APPLE)
-    set(LLVM_ENABLE_EH ON CACHE BOOL "Enable exception handling in LLVM" FORCE)
-endif()
 message(STATUS "LLVM STATUS:
-    Version                             ${LLVM_VERSION}
-    Includes                            ${LLVM_INCLUDE_DIRS}
-    Libraries                           ${LLVM_LIBRARY_DIRS}
-    Build type                          ${LLVM_BUILD_TYPE}
-    Dynamic lib                         ${LLVM_LINK_LLVM_DYLIB}"
+    Version:                            ${LLVM_VERSION}
+    Includes:                           ${LLVM_INCLUDE_DIRS}
+    Libraries:                          ${LLVM_LIBRARY_DIRS}
+    Build type:                         ${LLVM_BUILD_TYPE}
+    RTTI enabled:                       ${LLVM_ENABLE_RTTI}
+    Exceptions enabled:                 ${LLVM_ENABLE_EH}
+    Dynamic lib:                        ${LLVM_LINK_LLVM_DYLIB}"
 )
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 include(AddLLVM)
@@ -148,7 +147,7 @@ if("${SVF_FOUND}")
         message(FATAL_ERROR "SVF & LLVM RTTI support mismatch (SVF: ${SVF_ENABLE_RTTI}, LLVM: ${LLVM_ENABLE_RTTI})! This indicates that the version of LLVM used by your SVF dependency does not match the version of LLVM used by your current project. You need to check and ensure both are using the same LLVM version.")
     endif()
     if(NOT (${SVF_ENABLE_EXCEPTIONS} STREQUAL ${LLVM_ENABLE_EH}))
-        message(FATAL_ERROR "SVF & LLVM exceptions support mismatch (SVF: ${SVF_ENABLE_EXCEPTIONS}, LLVM: ${LLVM_ENABLE_EH})! This indicates that the version of LLVM used by your SVF dependency does not match the version of LLVM used by your current project. You need to check and ensure both are using the same LLVM version.")
+        message(WARNING "SVF & LLVM exceptions support mismatch (SVF: ${SVF_ENABLE_EXCEPTIONS}, LLVM: ${LLVM_ENABLE_EH}). You may not be able to catch exceptions across modules between SVF and LLVM.")
     endif()
 
     # Include SVF include directories and link the library directories
@@ -186,14 +185,20 @@ set(CMAKE_INSTALL_RPATH ${Z3_INCLUDES})
 link_libraries(${Z3_LIBRARIES})
 include_directories(SYSTEM ${Z3_INCLUDES})
 
-# The above section provides a general CMake template for SVF ecosystem projects. The following section contains settings specific to this project.
-# ---------------------------------------------------------------------------------------------------
+# ==============================================================================
+#                           SVF Ecosystem CMake Template
+# ==============================================================================
+#                 ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+#   Everything above this line is a general CMake template for SVF ecosystem projects.
+#   Everything below this line is specific to this project (user/application code).
+# ==============================================================================
+
 
 # Define the primary (minimal) example using SVF as library in an executable
 add_executable(svf-example src/svf-example.cpp)
 
 # Only link against SVF; LLVM & Z3 dependencies are resolved internally
-target_link_libraries(svf-example PRIVATE SVF::SvfCore SVF::SvfLLVM)
+target_link_libraries(svf-example PRIVATE SvfCore SvfLLVM LLVM)
 
 # Set the executable example to install to the local directory (as prefix)
 install(TARGETS svf-example RUNTIME DESTINATION bin)
