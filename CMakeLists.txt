@@ -198,7 +198,7 @@ include_directories(SYSTEM ${Z3_INCLUDES})
 add_executable(svf-example src/svf-example.cpp)
 
 # Only link against SVF; LLVM & Z3 dependencies are resolved internally
-target_link_libraries(svf-example PRIVATE SvfCore SvfLLVM LLVM)
+target_link_libraries(svf-example PRIVATE ${llvm_libs} ${SVF_LIB})
 
 # Set the executable example to install to the local directory (as prefix)
 install(TARGETS svf-example RUNTIME DESTINATION bin)
