@@ -60,6 +60,6 @@ jobs:
           cd SVF
           source build.sh
           cd ..
-          cmake -B scratch_build -S --install-prefix=$GITHUB_WORKSPACE/scratch_svf
+          cmake -B scratch_build -S ./ --install-prefix=$GITHUB_WORKSPACE/scratch_svf
           cmake --build scratch_build --verbose
           cmake --install scratch_build --verbose
