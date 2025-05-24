@@ -71,19 +71,7 @@ if(LLVM_LINK_LLVM_DYLIB)
     set(llvm_libs LLVM)
 else()
     message(STATUS "Linking to separate LLVM static libraries")
-    llvm_map_components_to_libnames(llvm_libs
-            bitwriter
-            core
-            ipo
-            irreader
-            instcombine
-            instrumentation
-            target
-            linker
-            analysis
-            scalaropts
-            support
-    )
+    llvm_map_components_to_libnames(llvm_libs bitwriter core ipo irreader instcombine instrumentation target linker analysis scalaropts support)
 endif()
 
 # Re-include AddLLVM module and configure LLVM/CMake settings
@@ -105,15 +93,7 @@ if(NOT DEFINED SVF_DIR AND DEFINED ENV{SVF_DIR})
 endif()
 # Find the SVF CMake package (pass $SVF_DIR as a (prioritised) hint) Set
 # $SVF_DIR to the installation prefix used to install SVF
-find_package(
-  SVF
-  REQUIRED
-  CONFIG
-  HINTS
-  ${SVF_DIR}
-  ${SVF_DIR}/Debug-build
-  ${SVF_DIR}/Release-build
-)
+find_package(SVF REQUIRED CONFIG HINTS ${SVF_DIR} ${SVF_DIR}/Debug-build ${SVF_DIR}/Release-build)
 
 message(STATUS "SVF STATUS:
     Found:                              ${SVF_FOUND}
@@ -163,18 +143,8 @@ set(SVF_LIB SvfLLVM SvfCore)
 
 # Find and configure Z3 package, first trying the system Z3 with CMake, then fallback to SVF's Z3 instance
 # Find Z3 and its include directory from the top-level include file
-find_library(
-        Z3_LIBRARIES
-        REQUIRED
-        NAMES z3
-        HINTS ${Z3_DIR} ENV Z3_DIR
-        PATH_SUFFIXES bin lib)
-find_path(
-        Z3_INCLUDES
-        REQUIRED
-        NAMES z3++.h
-        HINTS ${Z3_DIR} ENV Z3_DIR
-        PATH_SUFFIXES include z3)
+find_library(Z3_LIBRARIES REQUIRED NAMES z3 HINTS ${Z3_DIR} ENV Z3_DIR PATH_SUFFIXES bin lib)
+find_path(Z3_INCLUDES REQUIRED NAMES z3++.h HINTS ${Z3_DIR} ENV Z3_DIR PATH_SUFFIXES include z3)
 message(STATUS "Z3 STATUS:
     Z3 library file:                    ${Z3_LIBRARIES}
     Z3 include directory:               ${Z3_INCLUDES}"
