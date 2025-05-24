@@ -37,6 +37,7 @@ jobs:
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
           sudo apt-get update
           sudo apt-get install cmake gcc g++ nodejs doxygen graphviz
+          sudo apt-get install -y build-essential cmake gcc g++ nodejs doxygen graphviz git curl software-properties-common lcov libncurses5-dev libtinfo6 libzstd-dev libffi-dev zlib1g-dev
 
       # install llvm and svf
       - name: env-setup
@@ -49,6 +50,16 @@ jobs:
           export SVF_DIR=$(npm root)/SVF
           export LLVM_DIR=$(npm root)/llvm-16.0.0.obj
           export Z3_DIR=$(npm root)/z3.obj
-          cmake -B build -S ./ --install-prefix=$GITHUB_WORKSPACE
+          cmake -B build -S ./ --install-prefix=$GITHUB_WORKSPACE/preinstall_svf
           cmake --build build --verbose
           cmake --install build --verbose
+
+      - name: build-svf-from-scratch
+        run: |
+          git clone https://github.com/SVF-tools/SVF.git
+          cd SVF
+          source build.sh
+          cd ..
+          cmake -B scratch_build -S ./ --install-prefix=$GITHUB_WORKSPACE/scratch_svf
+          cmake --build scratch_build --verbose
+          cmake --install scratch_build --verbose
