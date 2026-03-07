@@ -95,7 +95,7 @@ void dummyVisit(const VFGNode *node) {}
  * An example to query/collect all the uses of a definition of a value along
  * value-flow graph (VFG)
  */
-void traverseOnVFG(const SVFG *vfg, const SVFVar *svfval) {
+void traverseOnVFG(const SVFG *vfg, const ValVar *svfval) {
   if (!vfg->hasDefSVFGNode(svfval))
     return;
   const VFGNode *vNode = vfg->getDefSVFGNode(svfval);
