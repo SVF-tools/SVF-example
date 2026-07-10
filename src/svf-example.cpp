@@ -28,6 +28,7 @@
  */
 
 #include "Graphs/SVFG.h"
+#include "MSSA/SVFGBuilder.h"
 #include "SVF-LLVM/SVFIRBuilder.h"
 #include "Util/Options.h"
 #include "WPA/Andersen.h"
