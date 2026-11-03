@@ -6,6 +6,10 @@ on:
   repository_dispatch:
     types: [new-commit-from-SVF]
 
+env:
+  # Keep this version in sync with the prebuilt svf-lib package.
+  LLVM_VERSION: '21.1.0'
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -37,7 +41,7 @@ jobs:
         run: |
           # Avoid ppa:ubuntu-toolchain-r/test — Launchpad's PPA infrastructure
           # has been intermittently unreachable from CI runners (HTTP 504 from
-          # add-apt-repository), and ubuntu-24.04's default gcc-13 is sufficient.
+          # add-apt-repository), and the runner's default GCC is sufficient.
           sudo apt-get update
           sudo apt-get install -y build-essential cmake gcc g++ nodejs doxygen graphviz git curl software-properties-common lcov libncurses5-dev libtinfo6 libzstd-dev libffi-dev zlib1g-dev
 
@@ -50,7 +54,7 @@ jobs:
       - name: build-svf-example
         run: |
           export SVF_DIR=$(npm root)/SVF
-          export LLVM_DIR=$(npm root)/llvm-21.1.0.obj
+          export LLVM_DIR="$(npm root)/llvm-${LLVM_VERSION}.obj"
           export Z3_DIR=$(npm root)/z3.obj
           cmake -B build -S ./ --install-prefix=$GITHUB_WORKSPACE/preinstall_svf
           cmake --build build --verbose
