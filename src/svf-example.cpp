@@ -29,7 +29,7 @@
 
 #include "Graphs/SVFG.h"
 #include "MSSA/SVFGBuilder.h"
-#include "SVF-LLVM/SVFIRBuilder.h"
+#include "SVF-LLVM/PAGBuilder.h"
 #include "Util/Options.h"
 #include "WPA/Andersen.h"
 #include "llvm/Support/ManagedStatic.h"
@@ -145,9 +145,9 @@ int main(int argc, char **argv) {
 
   LLVMModuleSet::buildSVFModule(moduleNameVec);
 
-  /// Build Program Assignment Graph (SVFIR)
-  SVFIRBuilder builder;
-  SVFIR *pag = builder.build();
+  /// Build Program Assignment Graph (PAG)
+  PAGBuilder builder;
+  PAG *pag = builder.build();
 
   /// Create Andersen's pointer analysis
   Andersen *ander = AndersenWaveDiff::createAndersenWaveDiff(pag);
@@ -180,7 +180,7 @@ int main(int argc, char **argv) {
   // clean up memory
   delete vfg;
   AndersenWaveDiff::releaseAndersenWaveDiff();
-  SVFIR::releaseSVFIR();
+  PAG::releasePAG();
 
   LLVMModuleSet::getLLVMModuleSet()->dumpModulesToFile(".svf.bc");
   SVF::LLVMModuleSet::releaseLLVMModuleSet();
